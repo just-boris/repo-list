@@ -1,0 +1,45 @@
+<html>
+<head>
+	<title>Just-Boris's home page</title>
+	<link href="http://netdna.bootstrapcdn.com/twitter-bootstrap/2.2.1/css/bootstrap-combined.min.css" rel="stylesheet">
+	<style>
+		.icon.fork {
+			width: 20px;
+			height: 20px;
+		}
+	</style>
+	<script type="text/javascript" src="http://ajax.googleapis.com/ajax/libs/angularjs/1.0.2/angular.min.js"></script>
+	<script src="http://ajax.googleapis.com/ajax/libs/angularjs/1.0.2/angular-resource.js"></script>
+	<script type="text/javascript">
+		angular.module('homeApp', ['ngResource']).controller('repoController', function($scope, $resource, $timeout, $compile) {
+			var callback = 'j'+(new Date()).valueOf();
+			Repos = $resource('https://api.github.com/users/just-boris/repos', {callback: callback}, {
+				get: {method: 'JSONP'}
+			});
+
+
+			$scope.repos = [];
+			Repos.get({});
+			window[callback] = function (response) {
+				$timeout(function() {
+					$scope.repos = response.data
+				});
+			}
+
+		});
+	</script>
+</head>
+<body ng-app="homeApp">
+	<a href="https://github.com/just-boris"><img style="position: absolute; top: 0; right: 0; border: 0;" src="https://s3.amazonaws.com/github/ribbons/forkme_right_red_aa0000.png" alt="Fork me on GitHub"></a>
+	<div ng-controller="repoController" class="container">
+		<h3>Hello! There is my repositories:</h3>
+		<div ng-repeat = "repo in repos">
+			<a href="{{repo.html_url}}">{{repo.name}}</a>
+			<p class="muted">
+				<ng-switch on="repo.fork"><img ng-switch-when="true" src="img/fork.png" class="fork icon" title="Forked repository"/></ng-switch>
+			 	{{repo.description}}
+		 	</p>
+		</div>
+	</div>
+</body>
+</html>
