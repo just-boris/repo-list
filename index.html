@@ -36,7 +36,7 @@
 		<div class="row" ng-repeat = "repo in repos">
 			<h5>
 				<ng-switch on="isHref(repo.homepage)">
-					<a ng-switch-when="true" ng-href="//{{repo.homepage}}">{{repo.name}}</a>
+					<a ng-switch-when="true" ng-href="/{{repo.name}}">{{repo.name}}</a>
 					<span ng-switch-when="false">{{repo.name}}</span>
 				</ng-switch>
 				<small>(<a href="{{repo.html_url}}">repo</a>)</small>
