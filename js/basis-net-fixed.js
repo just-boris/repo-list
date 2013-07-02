@@ -1,4 +1,8 @@
-
+(function() {
+  var context = basis.namespace('basis.net'),
+      global = window;
+      
+  "use strict";
   basis.require('basis.ua');
   basis.require('basis.event');
   basis.require('basis.data');
@@ -359,8 +363,8 @@
   */
   function setRequestHeaders(request, requestData){
     var headers = {
-      // 'X-Powered-By': 'basis.js',
       'X-Requested-With': 'XMLHttpRequest'
+      // 'X-Powered-By': 'basis.js'
     };
 
     if (IS_METHOD_WITH_BODY.test(requestData.method)) 
@@ -531,7 +535,7 @@
 
       params = params.join('&');
 
-      // prepare location & postBody
+777777      // prepare location & postBody
       if (!requestData.postBody && IS_METHOD_WITH_BODY.test(requestData.method))
       {
         requestData.postBody = params || '';
@@ -738,11 +742,10 @@
     }
   });
 
-
   //
   // export names
   //
-  module.exports = {
+  basis.net = {
     createEvent: createTransportEvent,
     transportDispatcher: transportDispatcher,
 
@@ -765,3 +768,4 @@
       transport.request();
     }
   };
+})();

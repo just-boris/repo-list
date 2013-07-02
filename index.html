@@ -12,7 +12,6 @@
 	<script src="http://ajax.googleapis.com/ajax/libs/angularjs/1.0.2/angular-resource.js"></script>
 	<script type="text/javascript">
 		angular.module('homeApp', ['ngResource']).controller('repoController', function($scope, $resource, $timeout, $filter) {
-			var callback = 'j'+(new Date()).valueOf();
 			Repos = $resource('https://api.github.com/users/just-boris/repos', {callback: 'JSON_CALLBACK'}, {
 				get: {method: 'JSONP'}
 			});

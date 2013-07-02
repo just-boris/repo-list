@@ -3,17 +3,20 @@
 	<title>Just-Boris's home page</title>
 	<link href="http://netdna.bootstrapcdn.com/twitter-bootstrap/2.2.1/css/bootstrap-combined.min.css" rel="stylesheet">
 	<style>
-		.icon.fork {
+		.icon.forked {
+			display: none;
 			width: 20px;
 			height: 20px;
 		}
+		.fork .icon.forked {
+			display: inline;
+		}
 	</style>
 	<script src="/basis/src/basis.js" basis-config></script>
+	<script src="/js/basis-net-fixed.js"></script>
 	<script type="text/javascript">
 		basis.ready(function(){
 			basis.require('basis.ui');
-			basis.require('/js/basis-net-fixed.js');
-			// basis.require('basis.net');
 			basis.require('basis.data');
 
 			var onSuccessLoad = function(transport, request, response) {
@@ -27,18 +30,31 @@
 					RepoItem = basis.ui.Node.subclass({
 					  className: 'RepoItem',
 					  template: '<div class="row"><h5><span>{name}</span> '+
-					  	'<small>(<a href="{html_url}">repo</a>)</small> </h5><p class="muted">{description}</p></div>',
+					  	'<small>(<a href="{html_url}">repo</a>)</small></h5><p class="muted {fork}"><img src="/img/fork.png" class="icon forked" title="Forked repository"/> {description}</p></div>',
 					  binding: {
 					    name: 'data:name',
 					    html_url: 'data:html_url',
+					    fork: 'data:fork',
 					    description: 'data:description'
 					  }
+					}),
+					RepoWithLink = RepoItem.subclass({
+						template: '<div class="row"><h5><a href="/{name}">{name}</a> '+
+					  	'<small>(<a href="{html_url}">repo</a>)</small></h5><p class="muted {fork}"><img src="/img/fork.png" class="icon forked" title="Forked repository"/> {description}</p></div>',
 					}),
 					list = new basis.ui.Node({
 					  container: document.querySelector('.container'),
 					  dataSource: repos,
 					  template: '<div />',
-					  childClass: RepoItem
+					  childFactory: function(config) {
+					  	if(basis.string.isEmpty(config.delegate.data.homepage)) {
+					  		return new RepoItem(config);
+					  	}
+					  	else {
+							return new RepoWithLink(config);
+					  	}
+					  }
+					  // childClass: RepoItem
 					});
 			};
 			new basis.net.AjaxTransport({
@@ -65,5 +81,16 @@
 	<div class="container">
 		<h3>Hello! There is my repositories:</h3>
 	</div>
+	<script type="text/javascript">
+	  var _gaq = _gaq || [];
+	  _gaq.push(['_setAccount', 'UA-39285873-1']);
+	  _gaq.push(['_trackPageview']);
+	
+	  (function() {
+	    var ga = document.createElement('script'); ga.type = 'text/javascript'; ga.async = true;
+	    ga.src = ('https:' == document.location.protocol ? 'https://ssl' : 'http://www') + '.google-analytics.com/ga.js';
+	    var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga, s);
+	  })();
+	</script>
 </body>
 </html>
