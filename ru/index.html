@@ -3,12 +3,12 @@
 	<title>Just-Boris's home page</title>
 	<link href="http://netdna.bootstrapcdn.com/twitter-bootstrap/2.2.1/css/bootstrap-combined.min.css" rel="stylesheet">
 	<style>
-		.icon.forked {
+		.icon {
 			display: none;
 			width: 20px;
 			height: 20px;
 		}
-		.fork .icon.forked {
+		.icon.forked {
 			display: inline;
 		}
 	</style>
@@ -38,7 +38,7 @@
 		          	binding: {
 		            	name: 'data:',
 		            	html_url: 'data:',
-		            	fork: 'data:',
+		            	forked: 'data:fork',
 		            	description: 'data:'
 		          	}
 				}
@@ -64,8 +64,8 @@
 	      <h5>
 	        <span>{name}</span> <small>(<a href="{html_url}">repo</a>)</small>
 	      </h5>
-	      <p class="muted {fork}">
-	        <img src="/img/fork.png" class="icon forked" title="Forked repository"/> {description}
+	      <p class="muted">
+	        <img src="/img/fork.png" class="icon {forked}" title="Forked repository"/> {description}
 	      </p>
 	    </div>
   	</script>
@@ -75,8 +75,8 @@
 	      <h5>
 	        <a href="/{name}">{name}</a> <small>(<a href="{html_url}">repo</a>)</small>
 	      </h5>
-	      <p class="muted {fork}">
-	        <img src="/img/fork.png" class="icon forked" title="Forked repository"/> {description}
+	      <p class="muted">
+	        <img src="/img/fork.png" class="icon {forked}" title="Forked repository"/> {description}
 	      </p>
 	    </div>
   	</script>
