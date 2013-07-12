@@ -13,58 +13,36 @@
 		}
 	</style>
 	<script src="/basis/src/basis.js" basis-config></script>
-	<script src="/js/basis-net-fixed.js"></script>
 	<script type="text/javascript">
 		basis.ready(function(){
-			basis.require('basis.ui');
-			basis.require('basis.data');
+	      	basis.require('basis.data');
+	      	basis.require('basis.template');
+	      	basis.require('basis.net.action');
+	      	basis.require('basis.ui');   
 
-			var onSuccessLoad = function(transport, request, response) {
-				var repos = new basis.data.Dataset({
-					  items: response.map(function(repo) {
-					  	return new basis.data.Object({
-					  		data: repo
-					  	});
-					  })
-					});
-					RepoItem = basis.ui.Node.subclass({
-					  className: 'RepoItem',
-					  template: '<div class="row"><h5><span>{name}</span> '+
-					  	'<small>(<a href="{html_url}">repo</a>)</small></h5><p class="muted {fork}"><img src="/img/fork.png" class="icon forked" title="Forked repository"/> {description}</p></div>',
-					  binding: {
-					    name: 'data:name',
-					    html_url: 'data:html_url',
-					    fork: 'data:fork',
-					    description: 'data:description'
-					  }
-					}),
-					RepoWithLink = RepoItem.subclass({
-						template: '<div class="row"><h5><a href="/{name}">{name}</a> '+
-					  	'<small>(<a href="{html_url}">repo</a>)</small></h5><p class="muted {fork}"><img src="/img/fork.png" class="icon forked" title="Forked repository"/> {description}</p></div>',
-					}),
-					list = new basis.ui.Node({
-					  container: document.querySelector('.container'),
-					  dataSource: repos,
-					  template: '<div />',
-					  childFactory: function(config) {
-					  	if(basis.string.isEmpty(config.delegate.data.homepage)) {
-					  		return new RepoItem(config);
-					  	}
-					  	else {
-							return new RepoWithLink(config);
-					  	}
-					  }
-					  // childClass: RepoItem
-					});
-			};
-			new basis.net.AjaxTransport({
-				method: 'GET',
-				asynchronous: true,
-				url: 'https://api.github.com/users/just-boris/repos',
-				handler: {
-					success: onSuccessLoad
+			var repoList = new basis.ui.Node({
+			  	container: document.querySelector('.container'),
+			  	template: '<div />',
+	          	syncAction: basis.net.action.create({
+		          	url: 'https://api.github.com/users/just-boris/repos',
+		          	success: function(response){
+			            this.setChildNodes(basis.data.wrap(response));
+		          	}
+	      	  	}),
+	          	childClass: {
+		          	template: basis.template.switcher('update', function(node){
+		            	return node.data.homepage
+		              		? 'id:repo-item-link-template'
+		              		: 'id:repo-item-template';
+		          	}),
+		          	binding: {
+		            	name: 'data:',
+		            	html_url: 'data:',
+		            	fork: 'data:',
+		            	description: 'data:'
+		          	}
 				}
-			}).request();
+			});
 		});
 	</script>
 </head>
@@ -81,6 +59,27 @@
 	<div class="container">
 		<h3>Hello! There are my repositories:</h3>
 	</div>
+  	<script type="text/basis-template" id="repo-item-template">
+	    <div class="row">
+	      <h5>
+	        <span>{name}</span> <small>(<a href="{html_url}">repo</a>)</small>
+	      </h5>
+	      <p class="muted {fork}">
+	        <img src="/img/fork.png" class="icon forked" title="Forked repository"/> {description}
+	      </p>
+	    </div>
+  	</script>
+ 
+  	<script type="text/basis-template" id="repo-item-link-template">
+	    <div class="row">
+	      <h5>
+	        <a href="/{name}">{name}</a> <small>(<a href="{html_url}">repo</a>)</small>
+	      </h5>
+	      <p class="muted {fork}">
+	        <img src="/img/fork.png" class="icon forked" title="Forked repository"/> {description}
+	      </p>
+	    </div>
+  	</script>
 	<script type="text/javascript">
 	  var _gaq = _gaq || [];
 	  _gaq.push(['_setAccount', 'UA-39285873-1']);
