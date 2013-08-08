@@ -8,23 +8,15 @@
 			height: 20px;
 		}
 	</style>
-	<script type="text/javascript" src="http://ajax.googleapis.com/ajax/libs/angularjs/1.0.2/angular.js"></script>
-	<script src="http://ajax.googleapis.com/ajax/libs/angularjs/1.0.2/angular-resource.js"></script>
+	<script type="text/javascript" src="http://ajax.googleapis.com/ajax/libs/angularjs/1.0.7/angular.js"></script>
 	<script type="text/javascript">
-		angular.module('homeApp', ['ngResource']).controller('repoController', function($scope, $resource, $timeout, $filter) {
-			Repos = $resource('https://api.github.com/users/just-boris/repos', {callback: 'JSON_CALLBACK'}, {
-				get: {method: 'JSONP'}
-			});
-
-			$scope.isHref = function(href) {
-				return href !== null && href !== "";
+		angular.module('homeApp', []).controller('repoController', function($scope, $http, $timeout, $filter) {
+			$scope.hasHomepage = function(repo) {
+				return repo.href !== null && repo.href !== "";
 			};
-
-			$scope.repos = [];
-			Repos.get({}, function (response) {
+			$http.get('https://api.github.com/users/just-boris/repos').then(function(response) {
 				$scope.repos = response.data
 			});
-
 		});
 	</script>
 	<script type="text/javascript">
@@ -53,7 +45,7 @@
 		<h3>Hello! There are my repositories:</h3>
 		<div class="row" ng-repeat = "repo in repos">
 			<h5>
-				<ng-switch on="isHref(repo.homepage)">
+				<ng-switch on="hasHomepage(repo)">
 					<a ng-switch-when="true" ng-href="/{{repo.name}}">{{repo.name}}</a>
 					<span ng-switch-when="false">{{repo.name}}</span>
 				</ng-switch>
