@@ -1,18 +1,49 @@
 <html>
 <head>
-	<title>Just-Boris's home page</title>
-	<link href="http://netdna.bootstrapcdn.com/twitter-bootstrap/2.2.1/css/bootstrap-combined.min.css" rel="stylesheet">
-	<style>
-		.icon {
-			display: none;
-			width: 20px;
-			height: 20px;
+	<title>My projects</title>
+	<link href="//netdna.bootstrapcdn.com/bootstrap/3.0.0/css/bootstrap.min.css" rel="stylesheet">
+	<link href="//netdna.bootstrapcdn.com/font-awesome/3.2.1/css/font-awesome.css" rel="stylesheet">
+	<style type="text/css">
+		.repo {
+			padding: 1em;
+			border-width: 1px 0 1px 0;
+			border-color: #FFF;
+			border-style: solid;
 		}
-		.icon.forked {
-			display: inline;
+		.repo:hover {
+			border-color: #c2c2c2;	
+		}
+		.repo h3, .repo p {
+			margin: 0;
+		}
+		.repo h3 i {
+			font-size: 1.2em;
+		}
+		a.github-repo {
+			color: #000;
+			text-decoration: none;
+		}
+		.repo-language {
+			float: right;
+			margin-right: 0.5em;
+		}
+		.filters {
+			overflow: hidden;
+			margin-bottom: 1em;
+		}
+		.pseudolink {
+			border-bottom: 1px dashed #225BAF;
+			color: #225BAF;
+			cursor: pointer;
+		}
+		.pseudolink + .pseudolink {
+			margin-left: 1em;
+		}
+		.pseudolink.active {
+			background: #eee;
 		}
 	</style>
-	<script src="/basis/src/basis.js" basis-config></script>
+	<script src="../basis/src/basis.js" basis-config></script>
 	<script type="text/javascript">
 		basis.ready(function(){
 	      	basis.require('basis.data');
@@ -37,6 +68,8 @@
 		          	}),
 		          	binding: {
 		            	name: 'data:',
+		            	language: 'data:',
+		            	homepage: 'data:',
 		            	html_url: 'data:',
 		            	forked: 'data:fork',
 		            	description: 'data:'
@@ -47,38 +80,54 @@
 	</script>
 </head>
 <body>
-	<a href="https://github.com/just-boris"><img style="position: absolute; top: 0; right: 0; border: 0;" src="https://s3.amazonaws.com/github/ribbons/forkme_right_red_aa0000.png" alt="Fork me on GitHub"></a>
-	<div class="navbar"><div class="navbar-inner">
-		<ul class="nav">
+	<nav class="navbar navbar-default" role="navigation">
+		<ul class="nav navbar-nav">
 			<li><a>Choose version:</a></li>
 	  		<li class="divider-vertical"></li>
-	  		<li class=""><a href="/">Angular JS</a></li>
-	  		<li class="active"><a href="/ru/">Basis JS</a></li>
+	  		<li class=""><a href="/repo-list/">Angular JS</a></li>
+	  		<li class="active"><a href="/repo-list/ru/">Basis JS</a></li>
 		</ul>
-	</div></div>
+		<ul class="nav navbar-nav navbar-right">
+			<li class=""><a href="https://github.com/just-boris/repo-list">Code on Github</a></li>
+			<li class=""><a href="/">Back to Catatron</a></li>
+		</ul>
+	</nav>
 	<div class="container">
-		<h3>Hello! There are my repositories:</h3>
+		<p>I have written some own projects. So, I have published on Github the most interesting of them in my opinion.</p>
+		<div class="filters">
+			<div class="btn-group">
+			  <button type="button" class="btn btn-default" ng-class="{active:!showForks}"  ng-click="showForks=false">Only own</button>
+			  <button type="button" class="btn btn-default" ng-class="{active:showForks}" ng-click="showForks=true">Include forks</button>
+			</div>
+			<form class="form-inline pull-right" role="form">
+				<select class="form-control" ng-model="lang" ng-options="language for language in languages">
+					<option value="">All languages</option>
+				</select>
+			</form>
+		</div>
 	</div>
   	<script type="text/basis-template" id="repo-item-template">
-	    <div class="row">
-	      <h5>
-	        <span>{name}</span> <small>(<a href="{html_url}">repo</a>)</small>
-	      </h5>
-	      <p class="muted">
-	        <img src="/img/fork.png" class="icon {forked}" title="Forked repository"/> {description}
-	      </p>
-	    </div>
+  	  	<div class="repo">
+			<div class="repo-language"><em>{language}</em></div>
+			<h3>
+				<span>{name}</span>
+				<a class="github-repo" title="Код на Github" href="{html_url}"> <i class="icon-github"></i> </a>
+				<i class="icon-code-fork" title="Форкнутый репозиторий"></i>
+			</h3>
+			<p>{description}</p>
+		</div>
   	</script>
  
   	<script type="text/basis-template" id="repo-item-link-template">
-	    <div class="row">
-	      <h5>
-	        <a href="/{name}">{name}</a> <small>(<a href="{html_url}">repo</a>)</small>
-	      </h5>
-	      <p class="muted">
-	        <img src="/img/fork.png" class="icon {forked}" title="Forked repository"/> {description}
-	      </p>
-	    </div>
+  	  	<div class="repo">
+			<div class="repo-language"><em>{language}</em></div>
+			<h3>
+				<a href="{homepage}">{name}</a>
+				<a class="github-repo" title="Код на Github" href="{html_url}"> <i class="icon-github"></i> </a>
+				<i class="icon-code-fork" title="Форкнутый репозиторий"></i>
+			</h3>
+			<p>{description}</p>
+		</div>
   	</script>
 	<script type="text/javascript">
 	  var _gaq = _gaq || [];
