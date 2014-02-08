@@ -5,49 +5,9 @@
     <meta charset="utf-8">
     <link href="//netdna.bootstrapcdn.com/bootstrap/3.0.0/css/bootstrap.min.css" rel="stylesheet">
     <link href="//netdna.bootstrapcdn.com/font-awesome/3.2.1/css/font-awesome.css" rel="stylesheet">
-    <style type="text/css">
-        .repo {
-            padding: 1em;
-            border-width: 1px 0 1px 0;
-            border-color: #FFF;
-            border-style: solid;
-        }
-        .repo:hover {
-            border-color: #c2c2c2;
-        }
-        .repo h3, .repo p {
-            margin: 0;
-        }
-        .repo h3 i {
-            font-size: 1.2em;
-        }
-        a.github-repo {
-            color: #000;
-            text-decoration: none;
-        }
-        .repo-language {
-            float: right;
-            margin-right: 0.5em;
-        }
-        .filters {
-            overflow: hidden;
-            margin-bottom: 1em;
-        }
-        .pseudolink {
-            border-bottom: 1px dashed #225BAF;
-            color: #225BAF;
-            cursor: pointer;
-        }
-        .pseudolink + .pseudolink {
-            margin-left: 1em;
-        }
-        .pseudolink.active {
-            background: #eee;
-        }
-    </style>
+    <link href="../styles.css" rel="stylesheet">
 
     <script src="http://yandex.st/jquery/2.1.0/jquery.min.js"></script>
-
     <script src="yate/lib/runtime.js"></script>
 
     <!-- nommon (the same, as used in noscript) -->
@@ -83,7 +43,40 @@
 
     <script src="noscript/yate/noscript-yate-externals.js"></script>
     <script src="templates.yate.js"></script>
-    <script src="app.js"></script>
+    <script type="text/javascript">
+        ns.router.routes = {
+            route: {'/': 'index'}
+        };
+        ns.layout.define('app', {
+            'app': {'content@': {}}
+        });
+        ns.layout.define('index', {
+            'app content@': 'index'
+        }, 'app');
+        ns.View.define('app');
+        ns.View.define('index', {
+            models: ['repos']
+        });
+        ns.Model.define('repo', {
+            params: {id: null}
+        });
+        ns.Model.define('repos', {
+            isCollection: true
+        });
+
+        $(function() {
+            ns.router.baseDir = location.pathname.substr(0, location.pathname.length - 1);
+            $.getJSON('https://api.github.com/users/just-boris/repos').success(function(response) {
+                response.forEach(function(repo) {
+                    ns.Model.get('repos').insert(
+                            ns.Model.get('repo', {id: repo.id}).setData(repo)
+                    );
+                });
+                ns.init();
+                ns.page.go();
+            });
+        });
+    </script>
 </head>
 <body>
     <nav class="navbar navbar-default" role="navigation">

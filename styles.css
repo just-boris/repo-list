@@ -1,0 +1,38 @@
+.repo {
+    padding: 1em;
+    border-width: 1px 0 1px 0;
+    border-color: #FFF;
+    border-style: solid;
+}
+.repo:hover {
+    border-color: #c2c2c2;
+}
+.repo h3, .repo p {
+    margin: 0;
+}
+.repo h3 i {
+    font-size: 1.2em;
+}
+a.github-repo {
+    color: #000;
+    text-decoration: none;
+}
+.repo-language {
+    float: right;
+    margin-right: 0.5em;
+}
+.filters {
+    overflow: hidden;
+    margin-bottom: 1em;
+}
+.pseudolink {
+    border-bottom: 1px dashed #225BAF;
+    color: #225BAF;
+    cursor: pointer;
+}
+.pseudolink + .pseudolink {
+    margin-left: 1em;
+}
+.pseudolink.active {
+    background: #eee;
+}

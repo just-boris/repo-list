@@ -4,56 +4,7 @@
     <meta charset="utf-8">
 	<link href="//netdna.bootstrapcdn.com/bootstrap/3.0.0/css/bootstrap.min.css" rel="stylesheet">
 	<link href="//netdna.bootstrapcdn.com/font-awesome/3.2.1/css/font-awesome.css" rel="stylesheet">
-	<style type="text/css">
-		.repo {
-			padding: 1em;
-			border-width: 1px 0 1px 0;
-			border-color: #FFF;
-			border-style: solid;
-		}
-		.repo:hover {
-			border-color: #c2c2c2;	
-		}
-		.repo h3, .repo p {
-			margin: 0;
-		}
-		.repo h3 i {
-			font-size: 1.2em;
-		}
-		a.github-repo {
-			color: #000;
-			text-decoration: none;
-		}
-		.repo-language {
-			float: right;
-			margin-right: 0.5em;
-		}
-		.filters {
-			overflow: hidden;
-			margin-bottom: 1em;
-		}
-		.pseudolink {
-			border-bottom: 1px dashed #225BAF;
-			color: #225BAF;
-			cursor: pointer;
-		}
-		.pseudolink + .pseudolink {
-			margin-left: 1em;
-		}
-		.pseudolink.active {
-			background: #eee;
-		}
-	</style>
-	<script type="text/javascript">
-		angular.module('homeApp', []).controller('repoController', function($scope, $http, $timeout, $filter) {
-			$scope.hasHomepage = function(repo) {
-				return repo.href !== null && repo.href !== "";
-			};
-			$http.get('https://api.github.com/users/just-boris/repos').then(function(response) {
-				$scope.repos = response.data
-			});
-		});
-	</script>
+	<link href="styles.css" rel="stylesheet">
 	<script type="text/javascript">
 	  var _gaq = _gaq || [];
 	  _gaq.push(['_setAccount', 'UA-39285873-1']);
@@ -72,7 +23,8 @@
 			<li><a>Choose version:</a></li>
 	  		<li class="divider-vertical"></li>
 	  		<li class="active"><a href="/repo-list/">Angular JS</a></li>
-	  		<li class=""><a href="/repo-list/basis/">Basis JS</a></li>
+	  		<li><a href="/repo-list/basis/">Basis JS</a></li>
+            <li><a href="/repo-list/noscript/">Noscript JS</a></li>
 		</ul>
 		<ul class="nav navbar-nav navbar-right">
 			<li class=""><a href="https://github.com/just-boris/repo-list">Code on Github</a></li>
@@ -107,7 +59,7 @@
 	</div>
 	<script type="text/javascript" src="http://ajax.googleapis.com/ajax/libs/angularjs/1.0.8/angular.js"></script>
 	<script type="text/javascript">
-		angular.module('homeApp', []).controller('repoController', function($scope, $http, $timeout, $filter) {
+		angular.module('homeApp', []).controller('repoController', function($scope, $http) {
 			function collectLanguages(repos) {
 				var result = [];
 				repos.forEach(function(repo) {
@@ -125,7 +77,7 @@
 					(!$scope.lang || item.language === $scope.lang);
 			};
 			$http.get('https://api.github.com/users/just-boris/repos').then(function(response) {
-				$scope.repos = response.data
+				$scope.repos = response.data;
 				$scope.languages = collectLanguages($scope.repos);
 			});
 		});
