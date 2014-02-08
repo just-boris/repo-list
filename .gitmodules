@@ -1,3 +1,12 @@
 [submodule "basis/basis"]
 	path = basis/basis
 	url = https://github.com/basisjs/basisjs.git
+[submodule "noscript/noscript"]
+	path = noscript/noscript
+	url = git@github.com:yandex-ui/noscript.git
+[submodule "noscript/nommon"]
+	path = noscript/nommon
+	url = git@github.com:pasaran/nommon.git
+[submodule "noscript/yate"]
+	path = noscript/yate
+	url = git@github.com:pasaran/yate.git

@@ -1,0 +1,104 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>My projects</title>
+    <meta charset="utf-8">
+    <link href="//netdna.bootstrapcdn.com/bootstrap/3.0.0/css/bootstrap.min.css" rel="stylesheet">
+    <link href="//netdna.bootstrapcdn.com/font-awesome/3.2.1/css/font-awesome.css" rel="stylesheet">
+    <style type="text/css">
+        .repo {
+            padding: 1em;
+            border-width: 1px 0 1px 0;
+            border-color: #FFF;
+            border-style: solid;
+        }
+        .repo:hover {
+            border-color: #c2c2c2;
+        }
+        .repo h3, .repo p {
+            margin: 0;
+        }
+        .repo h3 i {
+            font-size: 1.2em;
+        }
+        a.github-repo {
+            color: #000;
+            text-decoration: none;
+        }
+        .repo-language {
+            float: right;
+            margin-right: 0.5em;
+        }
+        .filters {
+            overflow: hidden;
+            margin-bottom: 1em;
+        }
+        .pseudolink {
+            border-bottom: 1px dashed #225BAF;
+            color: #225BAF;
+            cursor: pointer;
+        }
+        .pseudolink + .pseudolink {
+            margin-left: 1em;
+        }
+        .pseudolink.active {
+            background: #eee;
+        }
+    </style>
+
+    <script src="http://yandex.st/jquery/2.1.0/jquery.min.js"></script>
+
+    <script src="yate/lib/runtime.js"></script>
+
+    <!-- nommon (the same, as used in noscript) -->
+    <script src="nommon/lib/no.base.js"></script>
+    <script src="nommon/lib/no.events.js"></script>
+    <script src="nommon/lib/no.parser.js"></script>
+    <script src="nommon/lib/no.jpath.js"></script>
+    <script src="nommon/lib/no.promise.js"></script>
+    <script src="nommon/lib/no.array.js"></script>
+    <script src="nommon/lib/no.object.js"></script>
+
+    <!-- noscript -->
+    <script src="noscript/src/ns.js"></script>
+    <script src="noscript/src/ns.log.js"></script>
+    <script src="noscript/src/ns.dom.js"></script>
+    <script src="noscript/src/ns.entityify.js"></script>
+    <script src="noscript/src/ns.history.js"></script>
+    <script src="noscript/src/ns.object.js"></script>
+    <script src="noscript/src/ns.consts.js"></script>
+    <script src="noscript/src/ns.consts.events.js"></script>
+    <script src="noscript/src/ns.http.js"></script>
+    <script src="noscript/src/ns.action.js"></script>
+    <script src="noscript/src/ns.box.js"></script>
+    <script src="noscript/src/ns.model.js"></script>
+    <script src="noscript/src/ns.modelCollection.js"></script>
+    <script src="noscript/src/ns.layout.js"></script>
+    <script src="noscript/src/ns.page.js"></script>
+    <script src="noscript/src/ns.request.js"></script>
+    <script src="noscript/src/ns.router.js"></script>
+    <script src="noscript/src/ns.update.js"></script>
+    <script src="noscript/src/ns.view.js"></script>
+    <script src="noscript/src/ns.viewCollection.js"></script>
+
+    <script src="noscript/yate/noscript-yate-externals.js"></script>
+    <script src="templates.yate.js"></script>
+    <script src="app.js"></script>
+</head>
+<body>
+    <nav class="navbar navbar-default" role="navigation">
+        <ul class="nav navbar-nav">
+            <li><a>Choose version:</a></li>
+            <li class="divider-vertical"></li>
+            <li><a href="/repo-list/">Angular JS</a></li>
+            <li><a href="/repo-list/basis/">Basis JS</a></li>
+            <li class="active"><a href="/repo-list/noscript/">Noscript JS</a></li>
+        </ul>
+        <ul class="nav navbar-nav navbar-right">
+            <li class=""><a href="https://github.com/just-boris/repo-list">Code on Github</a></li>
+            <li class=""><a href="/">Back to Catatron</a></li>
+        </ul>
+    </nav>
+    <div id="app" class="container"></div>
+</body>
+</html>
