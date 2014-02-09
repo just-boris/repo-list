@@ -47,17 +47,15 @@
 		<div class="repo" ng-repeat = "repo in repos | filter:filterRepos">
 			<div class="repo-language"><em>{{repo.language}}</em></div>
 			<h3>
-				<ng-switch on="hasHomepage(repo)">
-					<a ng-switch-when="true" ng-href="{{repo.homepage}}">{{repo.name}}</a>
-					<span ng-switch-when="false">{{repo.name}}</span>
-				</ng-switch>
-				<a class="github-repo" title="Код на Github" href="{{repo.html_url}}"><i class="icon-github"></i></a>
+                <a ng-if="repo.homepage" ng-href="{{repo.homepage}}">{{repo.name}}</a>
+                <span ng-if="!repo.homepage">{{repo.name}}</span>
+				<a class="github-repo" title="Код на Github" ng-href="{{repo.html_url}}"><i class="icon-github"></i></a>
 				<i class="icon-code-fork" ng-show="repo.fork" title="Форкнутый репозиторий"></i>
 			</h3>
 			<p>{{repo.description}}</p>
 		</div>
 	</div>
-	<script type="text/javascript" src="http://ajax.googleapis.com/ajax/libs/angularjs/1.0.8/angular.js"></script>
+	<script type="text/javascript" src="http://ajax.googleapis.com/ajax/libs/angularjs/1.2.12/angular.js"></script>
 	<script type="text/javascript">
 		angular.module('homeApp', []).controller('repoController', function($scope, $http) {
 			function collectLanguages(repos) {
@@ -69,9 +67,6 @@
 				});
 				return result;
 			}
-			$scope.hasHomepage = function(repo) {
-				return repo.homepage !== null && repo.homepage !== "";
-			};
 			$scope.filterRepos = function(item) {
 				return ($scope.showForks || !item.fork) &&
 					(!$scope.lang || item.language === $scope.lang);
