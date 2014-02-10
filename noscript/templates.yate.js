@@ -39,7 +39,7 @@ var yr = yr || require('yate/lib/runtime.js');
 
     M.k0 = {};
     M.k0.n = function k0n(m, c0, i0, l0) {
-        return m.n(j2, m.v('v1', c0.doc.root));
+        return m.n(j2, m.v('v1', c0));
     };
     //  scalar
     M.k0.u = function k0u(m, c0, i0, l0) {
@@ -72,19 +72,25 @@ var yr = yr || require('yate/lib/runtime.js');
 
     var j13 = [ 0, 'index' ];
 
-    var j14 = [ 0, 'models', 0, 'repos', 0, 'items' ];
+    var j14 = [ 0, 'filters' ];
 
-    var j15 = [ 0, 'language' ];
+    var j15 = [ 0, 'models', 0, 'langs' ];
 
-    var j16 = [ 0, 'name' ];
+    var j16 = [ 0, 'list' ];
 
-    var j17 = [ 0, 'homepage' ];
+    var j17 = [ 0, 'models', 0, 'repos', 0, 'items' ];
 
-    var j18 = [ 0, 'html_url' ];
+    var j18 = [ 0, 'language' ];
 
-    var j19 = [ 0, 'fork' ];
+    var j19 = [ 0, 'name' ];
 
-    var j20 = [ 0, 'description' ];
+    var j20 = [ 0, 'homepage' ];
+
+    var j21 = [ 0, 'html_url' ];
+
+    var j22 = [ 0, 'fork' ];
+
+    var j23 = [ 0, 'description' ];
 
     // match /
     M.t0 = function t0(m, c0, i0, l0, a0) {
@@ -149,7 +155,7 @@ var yr = yr || require('yate/lib/runtime.js');
             if (simpleBoolean('async', c0.doc.root)) {
                 r0 += m.a(m, m.s(j3, c0), 'ns-view-async-content', a0)
             } else {
-                if ((cmpSN(false, simpleBoolean('is_models_valid', c0.doc.root)))) {
+                if (( selectNametest('is_models_valid', c0.doc.root, []) ).length && !simpleBoolean('is_models_valid', c0.doc.root)) {
                     r0 += m.a(m, m.s(j3, c0), 'ns-view-error-content', a0)
                 } else {
                     r0 += m.a(m, m.s(j3, c0), 'ns-view-content', a0)
@@ -252,7 +258,7 @@ var yr = yr || require('yate/lib/runtime.js');
     M.t9.j = j13;
     M.t9.a = 0;
 
-    // match .index : ns-view-content
+    // match .filters : ns-view-content
     M.t10 = function t10(m, c0, i0, l0, a0) {
         var r0 = '';
 
@@ -265,36 +271,54 @@ var yr = yr || require('yate/lib/runtime.js');
         r0 += "</div>";
         r0 += "<form class=\"" + "form-inline pull-right" + "\" role=\"" + "form" + "\">";
         r0 += "<select class=\"" + "form-control" + "\" ng-model=\"" + "lang" + "\" ng-options=\"" + "language for language in languages" + "\">";
-        r0 += "<option value=\"" + "" + "\">" + "All languages" + "</option>";
+        r0 += "<option value=\"" + "none" + "\">" + "All languages" + "</option>";
+        var items0 = m.s(j15, c0.doc.root);
+        for (var i1 = 0, l1 = items0.length; i1 < l1; i1++) {
+            var c1 = items0[ i1 ];
+            r0 += "<option value=\"" + nodeset2attrvalue( ( m.s(j3, c1) ) ) + "\">" + nodeset2xml( ( m.s(j3, c1) ) ) + "</option>";
+        }
         r0 += "</select>";
         r0 += "</form>";
         r0 += "</div>";
-        var items0 = m.s(j14, c0.doc.root);
+
+        return r0;
+    };
+    M.t10.j = j14;
+    M.t10.a = 0;
+
+    // match .list : ns-view-content
+    M.t11 = function t11(m, c0, i0, l0, a0) {
+        var r0 = '';
+
+        r0 += closeAttrs(a0);
+        var items0 = m.s(j17, c0.doc.root);
         for (var i1 = 0, l1 = items0.length; i1 < l1; i1++) {
             var c1 = items0[ i1 ];
-            r0 += "<div class=\"" + "repo" + "\">";
-            r0 += "<div class=\"" + "repo-language" + "\"><em>" + nodeset2xml( ( selectNametest('language', c1, []) ) ) + "</em></div>";
-            r0 += "<h3>";
-            if (simpleBoolean('homepage', c1)) {
-                r0 += "<a href=\"" + nodeset2attrvalue( ( selectNametest('homepage', c1, []) ) ) + "\">" + nodeset2xml( ( selectNametest('name', c1, []) ) ) + "</a>";
-            } else {
-                r0 += "<span>" + nodeset2xml( ( selectNametest('name', c1, []) ) ) + "</span>";
-            }
-            r0 += " ";
-            r0 += "<a class=\"" + "github-repo" + "\" title=\"" + "Код на Github" + "\" href=\"" + nodeset2attrvalue( ( selectNametest('html_url', c1, []) ) ) + "\"><i class=\"" + "icon-github" + "\"></i></a>";
-            if (simpleBoolean('fork', c1)) {
+            if ((yr.externals['not-filtered'])(m.s(j3, c1))) {
+                r0 += "<div class=\"" + "repo" + "\">";
+                r0 += "<div class=\"" + "repo-language" + "\"><em>" + nodeset2xml( ( selectNametest('language', c1, []) ) ) + "</em></div>";
+                r0 += "<h3>";
+                if (simpleBoolean('homepage', c1)) {
+                    r0 += "<a href=\"" + nodeset2attrvalue( ( selectNametest('homepage', c1, []) ) ) + "\">" + nodeset2xml( ( selectNametest('name', c1, []) ) ) + "</a>";
+                } else {
+                    r0 += "<span>" + nodeset2xml( ( selectNametest('name', c1, []) ) ) + "</span>";
+                }
                 r0 += " ";
-                r0 += "<i class=\"" + "icon-code-fork" + "\" ng-show=\"" + "repo" + "\" title=\"" + "Форкнутый репозиторий" + "\"></i>";
+                r0 += "<a class=\"" + "github-repo" + "\" title=\"" + "Код на Github" + "\" href=\"" + nodeset2attrvalue( ( selectNametest('html_url', c1, []) ) ) + "\"><i class=\"" + "icon-github" + "\"></i></a>";
+                if (simpleBoolean('fork', c1)) {
+                    r0 += " ";
+                    r0 += "<i class=\"" + "icon-code-fork" + "\" ng-show=\"" + "repo" + "\" title=\"" + "Форкнутый репозиторий" + "\"></i>";
+                }
+                r0 += "</h3>";
+                r0 += "<p>" + nodeset2xml( ( selectNametest('description', c1, []) ) ) + "</p>";
+                r0 += "</div>";
             }
-            r0 += "</h3>";
-            r0 += "<p>" + nodeset2xml( ( selectNametest('description', c1, []) ) ) + "</p>";
-            r0 += "</div>";
         }
 
         return r0;
     };
-    M.t10.j = j13;
-    M.t10.a = 0;
+    M.t11.j = j16;
+    M.t11.a = 0;
 
     M.matcher = {
         "": {
@@ -330,8 +354,12 @@ var yr = yr || require('yate/lib/runtime.js');
             "*": [
                 "t5"
             ],
-            "index": [
+            "filters": [
                 "t10",
+                "t5"
+            ],
+            "list": [
+                "t11",
                 "t5"
             ]
         },

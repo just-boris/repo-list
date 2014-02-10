@@ -1,0 +1,47 @@
+module "main"
+
+external boolean not-filtered(nodeset)
+
+include "noscript/yate/noscript.yate"
+
+match .filters ns-view-content {
+    <p>I have written some own projects. So, I have published on Github the most interesting of them in my opinion.</p>
+    <div class="filters">
+        <div class="btn-group">
+            <button type="button" class="btn btn-default">Only own</button>
+            <button type="button" class="btn btn-default">Include forks</button>
+        </div>
+        <form class="form-inline pull-right" role="form">
+            <select class="form-control" ng-model="lang" ng-options="language for language in languages">
+                <option value="none">All languages</option>
+                for /.models.langs {
+                    <option value="{.}">{.}</option>
+                }
+            </select>
+        </form>
+    </div>
+}
+
+match .list ns-view-content {
+    for /.models.repos.items {
+        if not-filtered(.) {
+            <div class="repo">
+                <div class="repo-language"><em>{.language}</em></div>
+                <h3>
+                    if .homepage {
+                        <a href="{.homepage}">{.name}</a>
+                    } else {
+                        <span>{.name}</span>
+                    }
+                    " "
+                    <a class="github-repo" title="Код на Github" href="{.html_url}"><i class="icon-github"></i></a>
+                    if .fork {
+                        " "
+                        <i class="icon-code-fork" ng-show="repo" title="Форкнутый репозиторий"></i>
+                    }
+                </h3>
+                <p>{.description}</p>
+            </div>
+        }
+    }
+}

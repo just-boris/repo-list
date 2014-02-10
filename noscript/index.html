@@ -51,20 +51,33 @@
             'app': {'content@': {}}
         });
         ns.layout.define('index', {
-            'app content@': 'index'
+            'app content@': {
+                filters: true,
+                list: true
+            }
         }, 'app');
         ns.View.define('app');
-        ns.View.define('index', {
-            models: ['repos'],
+        ns.View.define('list', {
+            models: ['repos', 'currentLang']
+        });
+        ns.View.define('filters', {
+            models: ['langs'],
             events: {
                 'change .filters select': 'onSelectLang'
             },
             methods: {
-                onSelectLang: function() {
-                    console.log(arguments);
+                onSelectLang: function(evt) {
+                    ns.Model.get('currentLang').setData(evt.target.value);
+                    ns.page.go();
                 }
             }
         });
+        yr.externals['not-filtered'] = function(nodeset) {
+            var repo = nodeset[0].data,
+                lang = ns.Model.get('currentLang').getData();
+            return lang === "none" || repo.language === lang
+        };
+
         ns.Model.define('repo', {
             params: {id: null}
         });
@@ -74,6 +87,7 @@
         ns.Model.define('langs', {
             isCollection: true
         });
+        ns.Model.define('currentLang');
         ns.page.title = function() {
             return document.title;
         };
@@ -88,7 +102,9 @@
                             result.push(repo.language);
                         }
                     });
+                    return result;
                 }
+                ns.Model.get('currentLang').setData("none");
                 ns.Model.get('langs').setData(collectLanguages(response));
                 response.forEach(function(repo) {
                     ns.Model.get('repos').insert(
@@ -115,6 +131,8 @@
             <li class=""><a href="/">Back to Catatron</a></li>
         </ul>
     </nav>
-    <div id="app" class="container"></div>
+    <div class="container">
+        <div id="app"></div>
+    </div>
 </body>
 </html>
