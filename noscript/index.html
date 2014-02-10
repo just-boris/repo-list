@@ -63,9 +63,12 @@
         ns.Model.define('repos', {
             isCollection: true
         });
+        ns.page.title = function() {
+            return document.title;
+        };
+        ns.router.baseDir = location.pathname.substr(0, location.pathname.length - 1);
 
         $(function() {
-            ns.router.baseDir = location.pathname.substr(0, location.pathname.length - 1);
             $.getJSON('https://api.github.com/users/just-boris/repos').success(function(response) {
                 response.forEach(function(repo) {
                     ns.Model.get('repos').insert(
