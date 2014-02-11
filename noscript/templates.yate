@@ -7,9 +7,9 @@ include "noscript/yate/noscript.yate"
 match .filters ns-view-content {
     <p>I have written some own projects. So, I have published on Github the most interesting of them in my opinion.</p>
     <div class="filters">
-        <div class="btn-group">
-            <button type="button" class="btn btn-default">Only own</button>
-            <button type="button" class="btn btn-default">Include forks</button>
+        <div class="btn-group forks">
+            <button type="button" class="btn btn-default forks_hide">Only own</button>
+            <button type="button" class="btn btn-default forks_show">Include forks</button>
         </div>
         <form class="form-inline pull-right" role="form">
             <select class="form-control" ng-model="lang" ng-options="language for language in languages">

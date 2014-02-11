@@ -70,27 +70,25 @@ var yr = yr || require('yate/lib/runtime.js');
 
     var j12 = [ 0, 'views', 0, '*' ];
 
-    var j13 = [ 0, 'index' ];
+    var j13 = [ 0, 'filters' ];
 
-    var j14 = [ 0, 'filters' ];
+    var j14 = [ 0, 'models', 0, 'langs' ];
 
-    var j15 = [ 0, 'models', 0, 'langs' ];
+    var j15 = [ 0, 'list' ];
 
-    var j16 = [ 0, 'list' ];
+    var j16 = [ 0, 'models', 0, 'repos', 0, 'items' ];
 
-    var j17 = [ 0, 'models', 0, 'repos', 0, 'items' ];
+    var j17 = [ 0, 'language' ];
 
-    var j18 = [ 0, 'language' ];
+    var j18 = [ 0, 'name' ];
 
-    var j19 = [ 0, 'name' ];
+    var j19 = [ 0, 'homepage' ];
 
-    var j20 = [ 0, 'homepage' ];
+    var j20 = [ 0, 'html_url' ];
 
-    var j21 = [ 0, 'html_url' ];
+    var j21 = [ 0, 'fork' ];
 
-    var j22 = [ 0, 'fork' ];
-
-    var j23 = [ 0, 'description' ];
+    var j22 = [ 0, 'description' ];
 
     // match /
     M.t0 = function t0(m, c0, i0, l0, a0) {
@@ -246,33 +244,21 @@ var yr = yr || require('yate/lib/runtime.js');
     M.t8.j = j2;
     M.t8.a = 0;
 
-    // match .index : ns-view-add-class
-    M.t9 = function t9(m, c0, i0, l0, a0) {
-        var r0 = '';
-
-        r0 += closeAttrs(a0);
-        r0 += " container";
-
-        return r0;
-    };
-    M.t9.j = j13;
-    M.t9.a = 0;
-
     // match .filters : ns-view-content
-    M.t10 = function t10(m, c0, i0, l0, a0) {
+    M.t9 = function t9(m, c0, i0, l0, a0) {
         var r0 = '';
 
         r0 += closeAttrs(a0);
         r0 += "<p>" + "I have written some own projects. So, I have published on Github the most interesting of them in my opinion." + "</p>";
         r0 += "<div class=\"" + "filters" + "\">";
-        r0 += "<div class=\"" + "btn-group" + "\">";
-        r0 += "<button type=\"" + "button" + "\" class=\"" + "btn btn-default" + "\">" + "Only own" + "</button>";
-        r0 += "<button type=\"" + "button" + "\" class=\"" + "btn btn-default" + "\">" + "Include forks" + "</button>";
+        r0 += "<div class=\"" + "btn-group forks" + "\">";
+        r0 += "<button type=\"" + "button" + "\" class=\"" + "btn btn-default forks_hide" + "\">" + "Only own" + "</button>";
+        r0 += "<button type=\"" + "button" + "\" class=\"" + "btn btn-default forks_show" + "\">" + "Include forks" + "</button>";
         r0 += "</div>";
         r0 += "<form class=\"" + "form-inline pull-right" + "\" role=\"" + "form" + "\">";
         r0 += "<select class=\"" + "form-control" + "\" ng-model=\"" + "lang" + "\" ng-options=\"" + "language for language in languages" + "\">";
         r0 += "<option value=\"" + "none" + "\">" + "All languages" + "</option>";
-        var items0 = m.s(j15, c0.doc.root);
+        var items0 = m.s(j14, c0.doc.root);
         for (var i1 = 0, l1 = items0.length; i1 < l1; i1++) {
             var c1 = items0[ i1 ];
             r0 += "<option value=\"" + nodeset2attrvalue( ( m.s(j3, c1) ) ) + "\">" + nodeset2xml( ( m.s(j3, c1) ) ) + "</option>";
@@ -283,15 +269,15 @@ var yr = yr || require('yate/lib/runtime.js');
 
         return r0;
     };
-    M.t10.j = j14;
-    M.t10.a = 0;
+    M.t9.j = j13;
+    M.t9.a = 0;
 
     // match .list : ns-view-content
-    M.t11 = function t11(m, c0, i0, l0, a0) {
+    M.t10 = function t10(m, c0, i0, l0, a0) {
         var r0 = '';
 
         r0 += closeAttrs(a0);
-        var items0 = m.s(j17, c0.doc.root);
+        var items0 = m.s(j16, c0.doc.root);
         for (var i1 = 0, l1 = items0.length; i1 < l1; i1++) {
             var c1 = items0[ i1 ];
             if ((yr.externals['not-filtered'])(m.s(j3, c1))) {
@@ -317,8 +303,8 @@ var yr = yr || require('yate/lib/runtime.js');
 
         return r0;
     };
-    M.t11.j = j16;
-    M.t11.a = 0;
+    M.t10.j = j15;
+    M.t10.a = 0;
 
     M.matcher = {
         "": {
@@ -339,10 +325,6 @@ var yr = yr || require('yate/lib/runtime.js');
         "ns-view-add-class": {
             "*": [
                 "t3"
-            ],
-            "index": [
-                "t9",
-                "t3"
             ]
         },
         "ns-view-add-attrs": {
@@ -355,11 +337,11 @@ var yr = yr || require('yate/lib/runtime.js');
                 "t5"
             ],
             "filters": [
-                "t10",
+                "t9",
                 "t5"
             ],
             "list": [
-                "t11",
+                "t10",
                 "t5"
             ]
         },
