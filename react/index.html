@@ -1,0 +1,117 @@
+<html>
+<head>
+    <title>My projects</title>
+    <meta charset="utf-8">
+    <link href="//netdna.bootstrapcdn.com/bootstrap/3.0.0/css/bootstrap.min.css" rel="stylesheet">
+    <link href="//netdna.bootstrapcdn.com/font-awesome/3.2.1/css/font-awesome.css" rel="stylesheet">
+    <link href="../styles.css" rel="stylesheet">
+    <script type="text/javascript">
+        var _gaq = _gaq || [];
+        _gaq.push(['_setAccount', 'UA-39285873-1']);
+        _gaq.push(['_trackPageview']);
+
+        (function() {
+            var ga = document.createElement('script'); ga.type = 'text/javascript'; ga.async = true;
+            ga.src = ('https:' == document.location.protocol ? 'https://ssl' : 'http://www') + '.google-analytics.com/ga.js';
+            var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga, s);
+        })();
+    </script>
+</head>
+<body>
+<nav class="navbar navbar-default" role="navigation">
+    <ul class="nav navbar-nav">
+        <li><a>Choose version:</a></li>
+        <li class="divider-vertical"></li>
+        <li><a href="..">Angular JS</a></li>
+        <li class="active"><a href="">React JS</a></li>
+        <li><a href="../basis/">Basis JS</a></li>
+        <li><a href="../noscript/">Noscript JS</a></li>
+    </ul>
+    <ul class="nav navbar-nav navbar-right">
+        <li class=""><a href="https://github.com/just-boris/repo-list">Code on Github</a></li>
+        <li class=""><a href="/">Back to Catatron</a></li>
+    </ul>
+</nav>
+<div class="container"></div>
+<script src="//fb.me/react-0.10.0.js"></script>
+<script src="//fb.me/JSXTransformer-0.10.0.js"></script>
+<script src="//code.jquery.com/jquery-1.10.0.min.js"></script>
+<script type="text/jsx">
+    /**
+     * @jsx React.DOM
+     */
+     var Repo = React.createClass({
+      render: function() {
+        var repo = this.props.data;
+        return (
+          <div className="repo">
+			<div className="repo-language"><em>{repo.language}</em></div>
+			<h3>
+                <a href="{repo.homepage}">{repo.name}</a>&nbsp;
+				<a className="github-repo" title="Код на Github" ng-href="{repo.html_url}"><i className="icon-github"></i></a>&nbsp;
+				<i className="icon-code-fork" show="repo.fork" title="Форкнутый репозиторий"></i>
+			</h3>
+			<p>{repo.description}</p>
+		</div>
+        );
+      }
+    });
+    var RepoList = React.createClass({
+      render: function() {
+        var repoNodes = this.props.data.map(function (repo) {
+            return <Repo data={repo} key={repo.id} />;
+        });
+        return (
+          <div>
+            {repoNodes}
+          </div>
+        );
+      }
+    });
+    var RepoFilter = React.createClass({
+      render: function() {
+        return (
+          <div className="filters">
+			<div className="btn-group">
+			  <button type="button" className="btn btn-default">Only own</button>
+			  <button type="button" className="btn btn-default">Include forks</button>
+			</div>
+			<form className="form-inline pull-right" role="form">
+				<select className="form-control">
+					<option value="">All languages</option>
+				</select>
+			</form>
+		  </div>
+        );
+      }
+    });
+    var RepoApp = React.createClass({
+      getInitialState: function() {
+        return {data: []};
+      },
+      componentWillMount: function() {
+        $.getJSON(this.props.url)
+          .done(function(data) {
+            this.setState({data: data});
+          }.bind(this))
+          .fail(function(xhr, status, err) {
+            console.error(this.props.url, status, err.toString());
+          }.bind(this));
+      },
+      render: function() {
+        return (
+          <div>
+            <p>I have written some own projects. So, I have published on Github the most interesting of them in my opinion.</p>
+            <RepoFilter />
+            <RepoList data={this.state.data} />
+          </div>
+        );
+      }
+    });
+    React.renderComponent(
+      <RepoApp url="https://api.github.com/users/just-boris/repos" />,
+      document.querySelector('.container')
+    );
+</script>
+</body>
+</html>
