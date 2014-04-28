@@ -11,9 +11,12 @@
         _gaq.push(['_trackPageview']);
 
         (function() {
-            var ga = document.createElement('script'); ga.type = 'text/javascript'; ga.async = true;
+            var ga = document.createElement('script');
+            ga.type = 'text/javascript';
+            ga.async = true;
             ga.src = ('https:' == document.location.protocol ? 'https://ssl' : 'http://www') + '.google-analytics.com/ga.js';
-            var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga, s);
+            var s = document.getElementsByTagName('script')[0];
+            s.parentNode.insertBefore(ga, s);
         })();
     </script>
 </head>
@@ -36,81 +39,116 @@
 <script src="//fb.me/react-0.10.0.js"></script>
 <script src="//fb.me/JSXTransformer-0.10.0.js"></script>
 <script src="//code.jquery.com/jquery-1.10.0.min.js"></script>
-<script type="text/jsx">
-    /**
-     * @jsx React.DOM
-     */
-     var Repo = React.createClass({
-      render: function() {
-        var repo = this.props.data;
-        return (
-          <div className="repo">
-			<div className="repo-language"><em>{repo.language}</em></div>
-			<h3>
-                <a href="{repo.homepage}">{repo.name}</a>&nbsp;
-				<a className="github-repo" title="Код на Github" ng-href="{repo.html_url}"><i className="icon-github"></i></a>&nbsp;
-				<i className="icon-code-fork" show="repo.fork" title="Форкнутый репозиторий"></i>
-			</h3>
-			<p>{repo.description}</p>
-		</div>
-        );
-      }
+<script type="text/javascript">
+    Object.keys(React.DOM).forEach(function(tag) {
+        window[tag] = React.DOM[tag];
+    });
+    var Repo = React.createClass({
+        render: function() {
+            var repo = this.props.data;
+            return div({className: "repo"},
+                div({className: "repo-language"}, em(null, repo.language)),
+                h3(null,
+                    repo.homepage ? a({href: "{repo.homepage}"}, repo.name) : span(null, repo.name),
+                    " ",
+                    a({className: "github-repo", title: "Код на Github", href: "{repo.html_url}"},
+                            i({className: "icon-github"})
+                    ),
+                    " ",
+                    repo.fork ? i({className: "icon-code-fork", show: "repo.fork", title: "Форкнутый репозиторий"}) : ''
+                ),
+                p(null, repo.description)
+            );
+        }
     });
     var RepoList = React.createClass({
-      render: function() {
-        var repoNodes = this.props.data.map(function (repo) {
-            return <Repo data={repo} key={repo.id} />;
-        });
-        return (
-          <div>
-            {repoNodes}
-          </div>
-        );
-      }
+        render: function() {
+            return div(null, this.props.data.map(function(repo) {
+                return Repo({data: repo, key: repo.id});
+            }));
+        }
     });
     var RepoFilter = React.createClass({
-      render: function() {
-        return (
-          <div className="filters">
-			<div className="btn-group">
-			  <button type="button" className="btn btn-default">Only own</button>
-			  <button type="button" className="btn btn-default">Include forks</button>
-			</div>
-			<form className="form-inline pull-right" role="form">
-				<select className="form-control">
-					<option value="">All languages</option>
-				</select>
-			</form>
-		  </div>
-        );
-      }
+        getInitialState: function() {
+            return this.props.filters;
+        },
+        showForks: function() {
+            this.state.forks = true;
+            this.setState(this.state);
+            this.props.onChange(this.state);
+        },
+        hideForks: function() {
+            this.state.forks = false;
+            this.setState(this.state);
+            this.props.onChange(this.state);
+        },
+        changeLang: function(event) {
+            this.state.lang = event.target.value;
+            this.setState(this.state);
+            this.props.onChange(this.state);
+        },
+        render: function() {
+            return div({className: "filters"},
+                div({className: "btn-group"},
+                    button({type: "button", className: "btn btn-default "+(!this.state.forks && 'active'), onClick: this.hideForks}, "Only own"),
+                    button({type: "button", className: "btn btn-default "+(this.state.forks && 'active'), onClick: this.showForks}, "Include forks")
+                ),
+                form({className: "form-inline pull-right", role: "form"},
+                    select({className: "form-control", onChange: this.changeLang},
+                        option({value: ""}, "All languages"),
+                        this.props.langs.map(function(lang) {
+                            return option({value: lang}, lang)
+                        })
+                    )
+                )
+            );
+        }
     });
     var RepoApp = React.createClass({
-      getInitialState: function() {
-        return {data: []};
-      },
-      componentWillMount: function() {
-        $.getJSON(this.props.url)
-          .done(function(data) {
-            this.setState({data: data});
-          }.bind(this))
-          .fail(function(xhr, status, err) {
-            console.error(this.props.url, status, err.toString());
-          }.bind(this));
-      },
-      render: function() {
-        return (
-          <div>
-            <p>I have written some own projects. So, I have published on Github the most interesting of them in my opinion.</p>
-            <RepoFilter />
-            <RepoList data={this.state.data} />
-          </div>
-        );
-      }
+        getInitialState: function() {
+            return {data: [], langs: [], filters: {fork: false}};
+        },
+        componentWillMount: function() {
+            $.getJSON(this.props.url)
+                .done(this.onLoadData)
+                .fail(function(xhr, status, err) {
+                    console.error(this.props.url, status, err.toString());
+                }.bind(this));
+        },
+        onLoadData: function(data) {
+            function collectLanguages(repos) {
+                var result = [];
+                repos.forEach(function(repo) {
+                    if(result.indexOf(repo.language) === -1)  {
+                        result.push(repo.language);
+                    }
+                });
+                return result;
+            }
+            this.state.data = data;
+            this.state.langs = collectLanguages(data);
+            this.setState(this.state)
+        },
+        updateRepos: function(filters) {
+            this.state.filters = filters;
+            this.setState(this.state);
+        },
+        render: function() {
+            return div(null,
+                p(null, "I have written some own projects. So, I have published on Github the most interesting of them in my opinion."),
+                RepoFilter({filters: this.state.filters, langs: this.state.langs, onChange: this.updateRepos}),
+                RepoList({
+                    data: this.state.data.filter(function(repo) {
+                        return (this.state.filters.forks || !repo.fork) &&
+                            (!this.state.filters.lang || repo.language === this.state.filters.lang);
+                    }, this)
+                })
+            );
+        }
     });
     React.renderComponent(
-      <RepoApp url="https://api.github.com/users/just-boris/repos" />,
-      document.querySelector('.container')
+        RepoApp({url: "https://api.github.com/users/just-boris/repos"}),
+        document.querySelector('.container')
     );
 </script>
 </body>
