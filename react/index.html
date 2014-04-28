@@ -49,9 +49,9 @@
             return div({className: "repo"},
                 div({className: "repo-language"}, em(null, repo.language)),
                 h3(null,
-                    repo.homepage ? a({href: "{repo.homepage}"}, repo.name) : span(null, repo.name),
+                    repo.homepage ? a({href: repo.homepage}, repo.name) : span(null, repo.name),
                     " ",
-                    a({className: "github-repo", title: "Код на Github", href: "{repo.html_url}"},
+                    a({className: "github-repo", title: "Код на Github", href: repo.html_url},
                             i({className: "icon-github"})
                     ),
                     " ",
