@@ -105,8 +105,11 @@
         }
     });
     var RepoApp = React.createClass({
+        getDefaultProps: function() {
+            return {data: [], langs: []};
+        },
         getInitialState: function() {
-            return {data: [], langs: [], filters: {fork: false}};
+            return {filters: {fork: false}};
         },
         componentWillMount: function() {
             $.getJSON(this.props.url)
@@ -125,20 +128,19 @@
                 });
                 return result;
             }
-            this.state.data = data;
-            this.state.langs = collectLanguages(data);
+            this.props.data = data;
+            this.props.langs = collectLanguages(data);
             this.setState(this.state)
         },
         updateRepos: function(filters) {
-            this.state.filters = filters;
-            this.setState(this.state);
+            this.setState({filters: filters});
         },
         render: function() {
             return div(null,
                 p(null, "I have written some own projects. So, I have published on Github the most interesting of them in my opinion."),
-                RepoFilter({filters: this.state.filters, langs: this.state.langs, onChange: this.updateRepos}),
+                RepoFilter({filters: this.state.filters, langs: this.props.langs, onChange: this.updateRepos}),
                 RepoList({
-                    data: this.state.data.filter(function(repo) {
+                    data: this.props.data.filter(function(repo) {
                         return (this.state.filters.forks || !repo.fork) &&
                             (!this.state.filters.lang || repo.language === this.state.filters.lang);
                     }, this)
