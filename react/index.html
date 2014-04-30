@@ -73,19 +73,16 @@
             return this.props.filters;
         },
         showForks: function() {
-            this.state.forks = true;
-            this.setState(this.state);
-            this.props.onChange(this.state);
+            this.setState({forks: true}, this.onChange);
         },
         hideForks: function() {
-            this.state.forks = false;
-            this.setState(this.state);
-            this.props.onChange(this.state);
+            this.setState({forks: false}, this.onChange);
         },
         changeLang: function(event) {
-            this.state.lang = event.target.value;
-            this.setState(this.state);
-            this.props.onChange(this.state);
+            this.setState({lang: event.target.value}, this.onChange);
+        },
+        onChange: function() {
+            this.props.onChange(this.state)
         },
         render: function() {
             return div({className: "filters"},
@@ -109,7 +106,7 @@
             return {data: [], langs: []};
         },
         getInitialState: function() {
-            return {filters: {fork: false}};
+            return {filters: {forks: false}};
         },
         componentWillMount: function() {
             $.getJSON(this.props.url)
@@ -130,7 +127,7 @@
             }
             this.props.data = data;
             this.props.langs = collectLanguages(data);
-            this.setState(this.state)
+            this.setState({});
         },
         updateRepos: function(filters) {
             this.setState({filters: filters});
