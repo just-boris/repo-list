@@ -38,7 +38,6 @@
 </nav>
 <div class="container">
     <p>I have written some own projects. So, I have published on Github the most interesting of them in my opinion.</p>
-
     <div class="filters">
         <div class="btn-group">
             <button type="button" class="btn btn-default hide-forks">Only own</button>
@@ -50,9 +49,7 @@
             </select>
         </form>
     </div>
-    <div class="repos">
-
-    </div>
+    <div class="repos"></div>
 </div>
 <script type="text/template" id="repo-item">
     <div class="repo">
@@ -68,7 +65,6 @@
             <i class="icon-code-fork" title="Форкнутый репозиторий"></i>
             <% } %>
         </h3>
-
         <p><%= description %></p>
     </div>
 </script>
@@ -79,47 +75,57 @@
 <script src="//cdnjs.cloudflare.com/ajax/libs/backbone.marionette/1.8.0/backbone.marionette.js"></script>
 <script type="text/javascript">
     var RepoCollection = Backbone.Collection.extend({
-                url: "https://api.github.com/users/just-boris/repos"
+            url: "https://api.github.com/users/just-boris/repos"
+        }),
+        FiltersView = Backbone.View.extend({
+            events: {
+                'change select': 'selectLang',
+                'click .show-forks': 'showForks',
+                'click .hide-forks': 'hideForks'
+            },
+            initialize: function(options) {
+                this.$select = this.$('select');
+                this.$btnShow = this.$('.show-forks');
+                this.$btnHide = this.$('.hide-forks');
+                options.langs.forEach(function(lang) {
+                    $('<option></option>').text(lang).appendTo(this.$select);
+                }, this);
+                this.filters= {};
+                setTimeout(this.hideForks.bind(this));
+            },
+            selectLang: function() {
+                this.filters.lang = this.$select.val();
+                this.trigger('update', this.filters);
+            },
+            toggleForks : function(showForks) {
+                this.filters.forks = showForks;
+                this.$btnShow.toggleClass('active', showForks);
+                this.$btnHide.toggleClass('active', !showForks);
+                this.trigger('update', this.filters);
+            },
+            showForks: function() {
+                this.toggleForks(true);
+            },
+            hideForks: function() {
+                this.toggleForks(false);
+            }
+        }),
+        RepoListView = Backbone.Marionette.CollectionView.extend({
+            itemView: Backbone.Marionette.ItemView.extend({
+                template: '#repo-item'
             }),
-            LangsCollection = Backbone.Collection.extend({}),
-            FiltersView = Backbone.View.extend({
-                events: {
-                    'change select': 'selectLang',
-                    'click .show-forks': 'showForks',
-                    'click .hide-forks': 'hideForks'
-                },
-                initialize: function(options) {
-                    this.$select = this.$('select');
-                    this.$btnShow = this.$('.show-forks');
-                    this.$btnHide = this.$('.hide-forks');
-                    options.langs.forEach(function(lang) {
-                        $('<option></option>').text(lang).appendTo(this.$select);
-                    }, this);
-                    this.filters= {};
-                    setTimeout(this.hideForks.bind(this));
-                },
-                selectLang: function() {
-                    this.filters.lang = this.$select.val();
-                    this.trigger('update', this.filters);
-                },
-                toggleForks : function(showForks) {
-                    this.filters.forks = showForks;
-                    this.$btnShow.toggleClass('active', showForks);
-                    this.$btnHide.toggleClass('active', !showForks);
-                    this.trigger('update', this.filters);
-                },
-                showForks: function() {
-                    this.toggleForks(true);
-                },
-                hideForks: function() {
-                    this.toggleForks(false);
-                }
-            }),
-            RepoListView = Backbone.Marionette.CollectionView.extend({
-                itemView: Backbone.Marionette.ItemView.extend({
-                    template: '#repo-item'
-                })
-            });
+            initialize: function(options) {
+                this.totalItems = options.totalItems;
+            },
+            filterRepos: function(filters) {
+                this.collection.reset(
+                    this.totalItems.filter(function(repo) {
+                        return (filters.forks || !repo.get('fork')) &&
+                            (!filters.lang || repo.get('language') === filters.lang);
+                    })
+                );
+            }
+        });
 
     $(function() {
         function collectLanguages(repos) {
@@ -131,27 +137,20 @@
             });
             return result;
         }
-
         var reposAll = new RepoCollection();
-
         reposAll.fetch().then(function(response) {
             var langs = collectLanguages(response),
                 filters = new FiltersView({
                     langs: langs,
                     el: '.filters'
                 }),
-                repos = new RepoCollection(),
                 repoList = new RepoListView({
-                    collection: repos,
+                    totalItems: reposAll,
+                    collection: new RepoCollection(),
                     el: '.repos'
                 });
-            repos.add(response);
-            filters.on('update', function(filters) {
-                repos.reset(reposAll.filter(function(repo) {
-                    return (filters.forks || !repo.get('fork')) &&
-                            (!filters.lang || repo.get('language') === filters.lang);
-                }));
-            });
+            repoList.collection.add(response);
+            filters.on('update', repoList.filterRepos.bind(repoList));
         });
     });
 </script>
