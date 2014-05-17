@@ -36,25 +36,25 @@
         <li class=""><a href="/">Back to Catatron</a></li>
     </ul>
 </nav>
-<div class="container">
-    <p>I have written some own projects. So, I have published on Github the most interesting of them in my opinion.</p>
-    <div class="filters"></div>
-    <div class="repos"></div>
-</div>
+<div class="app container"></div>
 
 <script type="text/template" id="filters">
-    <div class="btn-group">
-        <button type="button" data-forks="false" class="btn btn-default <%= forks ? '' : 'active' %>">Only own</button>
-        <button type="button" data-forks="true" class="btn btn-default <%= forks ? 'active' : '' %>">Include forks</button>
+    <p>I have written some own projects. So, I have published on Github the most interesting of them in my opinion.</p>
+    <div class="filters">
+        <div class="btn-group">
+            <button type="button" data-forks="false" class="btn btn-default <%= forks ? '' : 'active' %>">Only own</button>
+            <button type="button" data-forks="true" class="btn btn-default <%= forks ? 'active' : '' %>">Include forks</button>
+        </div>
+        <form class="form-inline pull-right" role="form">
+            <select class="form-control">
+                <option value="">All languages</option>
+                <% langs.forEach(function(lang) { %>
+                    <option><%= lang %></option>
+                <% }) %>
+            </select>
+        </form>
     </div>
-    <form class="form-inline pull-right" role="form">
-        <select class="form-control">
-            <option value="">All languages</option>
-            <% langs.forEach(function(lang) { %>
-                <option><%= lang %></option>
-            <% }) %>
-        </select>
-    </form>
+    <div class="repos"></div>
 </script>
 <script type="text/template" id="repo-item">
     <div class="repo">
@@ -82,11 +82,15 @@
     var RepoCollection = Backbone.Collection.extend({
             url: "https://api.github.com/users/just-boris/repos"
         }),
-        FiltersView = Backbone.Marionette.ItemView.extend({
+        AppView = Backbone.Marionette.CompositeView.extend({
             template: '#filters',
+            itemViewContainer: '.repos',
+            itemView: Backbone.Marionette.ItemView.extend({
+                template: '#repo-item'
+            }),
             events: {
-                'change select': function() {
-                    this.model.set('lang', this.$('select').val())
+                'change select': function(e) {
+                    this.model.set('lang', e.target.value)
                 },
                 'click [data-forks="true"]': function() {
                     this.model.set('forks', true);
@@ -95,19 +99,14 @@
                     this.model.set('forks', false);
                 }
             },
-            initialize: function() {
-                this.model.on('change:forks', this.render);
-            }
-        }),
-        RepoListView = Backbone.Marionette.CollectionView.extend({
-            itemView: Backbone.Marionette.ItemView.extend({
-                template: '#repo-item'
-            }),
             initialize: function(options) {
+                this.model.on('change:forks', this.render);
+                this.model.on('change', this.filterRepos.bind(this));
                 this.totalItems = options.totalItems;
+                this.filterRepos(this.model);
             },
-            filterRepos: function(filtersModel) {
-                var filters = filtersModel.toJSON();
+            filterRepos: function() {
+                var filters = this.model.toJSON();
                 this.collection.reset(
                     this.totalItems.filter(function(repo) {
                         return (filters.forks || !repo.get('fork')) &&
@@ -130,22 +129,16 @@
         var reposAll = new RepoCollection();
         reposAll.fetch().then(function(response) {
             var langs = collectLanguages(response),
-                filters = new FiltersView({
+                app = new AppView({
+                    el: '.app',
                     model: new Backbone.Model({
                         langs: langs,
                         forks: false,
                         lang: ""
                     }),
-                    el: '.filters'
-                }).render(),
-                repoList = new RepoListView({
                     totalItems: reposAll,
-                    collection: new RepoCollection(),
-                    el: '.repos'
-                });
-            repoList.collection.add(response);
-            repoList.filterRepos(filters.model);
-            filters.model.on('change', repoList.filterRepos.bind(repoList));
+                    collection: new RepoCollection(response)
+                }).render();
         });
     });
 </script>
