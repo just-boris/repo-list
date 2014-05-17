@@ -55,11 +55,11 @@
             <div class="repo-language"><em>{{language}}</em></div>
             <h3>
                 {{#if homepage}}
-                    <a href="{{homepage}}">{{name}}</a>
+                    <a {{bindAttr href="homepage"}}>{{name}}</a>
                 {{else}}
                     <span>{{name}}</span>
                 {{/if}}
-                <a class="github-repo" title="Код на Github" href="{{html_url}}"><i class="icon-github"></i></a>
+                <a class="github-repo" title="Код на Github" {{bindAttr href="html_url"}}><i class="icon-github"></i></a>
                 {{#if fork}}
                     <i class="icon-code-fork" title="Форкнутый репозиторий"></i>
                 {{/if}}
