@@ -1,0 +1,144 @@
+﻿<!doctype html>
+
+<html>
+
+<head>
+  <meta http-equiv="Content-type" content="text/html; charset=utf-8" />
+
+  <title>Basis.js demos: Grouping switch</title>
+
+  <style type="text/css" id="demo-css">
+    HTML,
+    BODY
+    {
+      font-size: small;
+      font-family: Tahoma, Verdana, Arial, sans-serif;
+    }
+
+    .Demo-Section
+    {
+      width: 350px;
+      float: left;
+      margin-right: 10px;
+      padding-right: 10px;
+    }
+
+    .Basis-Tree
+    {
+      background: white;
+      border: 1px solid #AAA;
+      height: 400px;
+      overflow: auto;
+      overflow-y: scroll;
+      overflow-x: hidden;
+    }
+
+    #demo-changeGroupingList
+    {
+      margin: .5em;
+    }
+  </style>
+  <!--[if lt IE 7]>
+  <style type="text/css">
+    BODY
+    {
+      font-size: x-small;
+    }
+  </style>
+  <![endif]-->
+
+  <script type="text/javascript" data-basis-config src="../../src/basis.js"></script>
+
+  <script type="text/javascript" src="../demo.js"></script>
+</head>
+
+<body>
+  <div id="demo-container"></div>
+
+  <script type="text/javascript" id="demo-javascript">
+    basis.require('basis.ui.tree');
+    basis.require('basis.ui.table');
+    basis.require('basis.ui.field');
+
+    // data
+    var data = basis.array.repeat([
+      { data: { title: 'Lorem', content: 'Lorem ipsum dolor sit amet, consectetuer adipiscing elit.' } },
+      { data: { title: 'Sed', content: 'Sed metus nibh, sodales a, porta at, vulputate eget, dui.' } },
+      { data: { title: 'Pellentesque', content: 'Pellentesque ut nisl.' } },
+      { data: { title: 'tortor', content: 'Maecenas tortor turpis, interdum non, sodales non, iaculis ac, lacus.' } },
+      { data: { title: 'Letters from A to Z', content: 'abcdefghijklmnopqrstuvwxyz' } }
+    ], 3);
+
+    //
+    // Create controls
+    //
+
+    var tree = new basis.ui.tree.Tree({
+      childNodes: data
+    });
+
+    var table = new basis.ui.table.Table({
+      childNodes: data,
+      structure: [
+        { header: 'Title', body: basis.getter('data.title') },
+        { header: 'Content', body: basis.getter('data.content') }
+      ]
+    });
+
+    new basis.ui.Node({
+      container: document.getElementById('demo-container'),
+      template:
+        '<div>' +
+          '<div id="demo-changeGroupingList">' +
+            'Choose grouping:' + 
+            '<!--{groupingSelect}-->' +
+          '</div>' +
+          '<div class="Demo-Section">' +
+            '<!--{tree}-->' +
+          '</div>' +
+          '<div class="Demo-Section">' +
+            '<!--{table}-->' +
+          '</div>' +
+        '</div>',
+
+      binding: {
+        tree: tree,
+        table: table,
+        groupingSelect: new basis.ui.field.RadioGroup({
+          handler: {
+            change: function(){
+              tree.setGrouping(this.getValue());
+              table.setGrouping(this.getValue());
+            }
+          },
+          childNodes: [
+            {
+              selected: true,
+              title: 'No grouping',
+              value: null
+            },
+            {
+              title: 'Group by title',
+              value: 'data.title'
+            },
+            {
+              title: 'Group by first letter',
+              value: {
+                rule: 'data.title.charAt(0)',
+                sorting: 'data.title',
+                childClass: {
+                  binding: {
+                    title: basis.getter('data.title', 'Group for letter <{0}>')
+                  }
+                }
+              }
+            }
+          ]
+        })
+      }
+    });
+
+  </script>
+</body>
+
+</html>

@@ -1,0 +1,18 @@
+/// {
+///     description: '</> as a universal closing tag',
+///     data: {
+///         username: 'nop'
+///     },
+///     result: '<div>Hello</div><div>Hello</div><b><i>nop</i></b>'
+/// }
+
+match / {
+    <div>Hello</>
+
+    <div>
+        "Hello"
+    </>
+
+    <b><i>{ .username }</></>
+}
+

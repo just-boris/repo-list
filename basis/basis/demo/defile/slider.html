@@ -1,0 +1,165 @@
+﻿<!doctype html>
+
+<html>
+
+<head>
+  <meta http-equiv="Content-type" content="text/html; charset=utf-8" />
+
+  <title>Basis.js demos: Slider</title>
+
+  <style type="text/css" id="demo-css">
+    HTML,
+    BODY
+    {
+      font-size: small;
+      font-family: Tahoma, Verdana, Arial, sans-serif;
+    }
+
+    #Demo-Section
+    {
+      width: 600px;
+      background: white;
+      border: 1px solid #E0E0E0;
+      padding: 5px;
+      margin-top: 20px;
+      position: relative;
+      min-width: 350px;
+      max-width: 90%;
+    }
+
+    .Basis-Resizer
+    {
+      opacity: .5 !important;
+      right: -5px;
+      width: 5px;
+      top: -1px;
+      bottom: -1px;
+    }
+
+    .slider_pages
+    {
+      text-align: right;
+      font-size: 0.8em; 
+      color: #808080;
+    }
+
+    .green
+    {
+      color: green;
+    }
+    .green.range
+    {
+      background: #BBB !important;
+    }
+    .red
+    {
+      color: red;
+    }
+    .ranges .Basis-Slider-Mark
+    {
+    }
+    .ranges .Basis-Slider-Mark-Caption
+    {
+      background-color: rgba(255,255,255,.75);
+      padding: 0 4px;
+    }
+  </style>
+  <!--[if lt IE 7]>
+  <style type="text/css">
+    BODY
+    {
+      font-size: x-small;
+    }
+  </style>
+  <![endif]-->
+
+  <script type="text/javascript" data-basis-config src="../../src/basis.js"></script>
+
+  <script type="text/javascript" src="../demo.js"></script>
+</head>
+
+<body>
+  <div id="demo-container"></div>
+
+  <script type="text/javascript" id="demo-javascript">
+    basis.require('basis.dom');
+    basis.require('basis.ui.button');
+    basis.require('basis.ui.slider');
+    basis.require('basis.ui.resizer');
+
+    var DOM = basis.dom;
+    var nsButton = basis.ui.button;
+    var Slider = basis.ui.slider.Slider;
+
+	  var sliders = [ 
+      new Slider({ min: 0, max: 100, step: 10, value: 23 }),
+      new Slider({ min: 0, max: 100, value: 47 }),
+      new Slider({ min: 0, max: 100, step: 50 }),
+      new Slider({ min: 20, max: 80, step: .15, captionFormat: function(value){ return value.toFixed(1); } }),
+      new Slider({ min: -15, max: 15, value: 0, marks: 15 }),
+      new Slider({ min: -15, max: -30, value: 0 }),
+      new Slider({ min: 0, max: 0, value: 0 }),
+      new Slider({ min: 0, max: 4, value: 2, 
+        captionFormat: function(val){
+          return ['very cold', 'cold', 'normal', 'hot', 'very hot'][val];
+        },
+        marks: [
+          {
+            count: 'auto',
+            captionFormat: basis.fn.$self,
+            childClass: {
+              isRange: true
+            }
+          },
+          'auto'
+        ]
+      }),
+      new Slider({ min: 0, max: 100,
+        marks: [
+          { 
+            template: '<b:include src="basis.ui.slider.MarkLayer" class="ranges"/>',
+            childClass: { isRange: true },
+            marks: [
+              { pos: .13, caption: 'range1', template: '<b:include src="basis.ui.slider.Mark" class="red"/>' },
+              { pos: .46, caption: 'range2', template: '<b:include src="basis.ui.slider.Mark" class="green"/>' }
+            ]
+          },
+          { 
+            marks: [
+              { pos: .33, caption: 'smthing', template: '<b:include src="basis.ui.slider.Mark" class="red"/>' },
+              { pos: .56, caption: 'smthing2', template: '<b:include src="basis.ui.slider.Mark" class="green"/>' },
+              { pos: .83, caption: 'lahmatiy', template: '<b:include src="basis.ui.slider.Mark" class="red"/>' }
+            ]
+          },
+          5
+        ]
+      })
+    ];
+
+	  var demoSection = DOM.createElement('#Demo-Section',
+      sliders.map(function(slider){
+        var label;
+        slider.addHandler({
+          change: function(){
+            label.nodeValue = Math.floor(this.value * 1000) / 1000;
+          }
+        });
+        return DOM.createElement('',
+          slider.element,
+          DOM.createElement(".slider_pages", label = DOM.createText(slider.value))
+        );
+      })
+    );
+
+    new basis.ui.resizer.Resizer({
+      element: demoSection
+    });
+
+    DOM.insert(DOM.get('demo-container'), [
+      demoSection
+    ]);
+
+  </script>
+</body>
+
+</html>

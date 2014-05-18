@@ -1,0 +1,16 @@
+/// {
+///     description: 'result of apply as an attribute\'s value',
+///     result: '<div class="b-hello">Hello</div>'
+/// }
+
+match / {
+    <div>
+        @class = apply . class
+        "Hello"
+    </div>
+}
+
+match / class {
+    "b-hello"
+}
+

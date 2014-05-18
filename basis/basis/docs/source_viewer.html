@@ -1,0 +1,68 @@
+
+<!doctype html>
+
+<html>
+
+<head>
+  <meta http-equiv="Content-type" content="text/html; charset=utf8" />
+  <title>Basis Source Viewer</title>
+
+  <script type="text/javascript" data-basis-config="" src="../src/basis.js"></script>
+
+  <style type="text/css">
+    BODY
+    {
+      color: black;
+      font-size: small;
+    }
+    .selected
+    {
+      background: gold !important;
+    }
+  </style>
+</head>
+
+<body>
+  <script type="text/javascript">
+    basis.require('basis.ui.code');
+    basis.require('basis.net');
+
+    var line = parseInt((location.hash || '').replace(/^#/, ''));
+    var filename = ((location.search || '').match(/[\?\&]file=([^&]+)/) || [])[1];
+    if (filename)
+    {
+      (new basis.net.Transport({
+        url: filename,
+        handler: {
+          complete: function(sender, req){
+            //t = new Date;
+            var node = new basis.ui.code.SourceCode({
+              container: document.body,
+              lang: 'js',
+              normalize: false,
+              data: {
+                code: req.data.responseText//.replace(/^\s*\n/, function(m){ return '.' + m })
+              }
+            });
+
+            //alert(new Date - t)
+            if (!isNaN(line))
+            {
+              var lineElement = node.element.childNodes[line - 1];
+              if (lineElement)
+              {
+                lineElement.className += ' selected';
+                basis.nextTick(function(){
+                  document.documentElement.scrollTop =
+                  document.body.scrollTop = lineElement.offsetTop - 200;
+                });
+              }
+            }
+          }
+        }
+      })).request();
+    }
+  </script>
+</body>
+
+</html>

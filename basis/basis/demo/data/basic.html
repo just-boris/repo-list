@@ -1,0 +1,156 @@
+﻿<!doctype html>
+
+<html>
+
+<head>
+  <meta http-equiv="Content-type" content="text/html; charset=utf-8" />
+
+  <title>Basis.js demos: Property &amp; ObjectSet</title>
+
+  <style type="text/css" id="demo-css">
+    .Basis-Tree
+    {
+      background: white;
+      border: 1px solid #AAA;
+      width: 240px;
+      height: 300px;
+      overflow: auto;
+      overflow-y: scroll;
+      overflow-x: hidden;
+      float: left;
+      margin-right: 10px;
+    }
+
+    .form-content
+    {
+      overflow: hidden;
+    }
+  </style>
+  <!--[if lt IE 7]>
+  <style type="text/css">
+    BODY
+    {
+      font-size: x-small;
+    }
+  </style>
+  <![endif]-->
+
+  <script type="text/javascript" data-basis-config src="../../src/basis.js"></script>
+
+  <script type="text/javascript" src="../demo.js"></script>
+</head>
+
+<body>
+  <div id="demo-container"></div>
+
+  <script id="demo-javascript" type="text/javascript">
+    basis.require('basis.dom');
+    basis.require('basis.event');
+    basis.require('basis.data');
+    basis.require('basis.data.value');
+    basis.require('basis.dom.wrapper');
+    basis.require('basis.ui.button');
+    basis.require('basis.data.value');
+
+    var DOM = basis.dom;
+    var nsData = basis.data;
+    var nsWrappers = basis.dom.wrapper;
+    var nsButton = basis.ui.button;
+    
+    var property1 = new nsData.value.Property(0);
+    var property2 = new nsData.value.Property(0);
+
+    var dataObjectSet = new nsData.value.ObjectSet({
+      objects: [property1, property2],
+      calculateValue: function(){
+        return this.objects.reduce(function(value, object){
+          return value + object.value;
+        }, 0);
+      }
+    });
+
+    // patch Value to compute changes count
+    basis.data.Value.extend({
+      updateCount: 0,
+      emit_change: function(){
+        this.updateCount += 1;
+        basis.event.events.change.apply(this, arguments);
+      }
+    });
+
+    var container = DOM.get('demo-container');
+    new nsButton.ButtonPanel({
+      container: container,
+      childNodes: [
+        {
+          caption: 'Add 1 to property1',
+          click: function(){
+            property1.set(property1.value + 1);
+          }
+        },
+        {
+          caption: 'Add 1 to property1 and than sub 1 ',
+          click: function(){
+            property1.set(property1.value + 1);
+            property1.set(property1.value - 1);
+          }
+        },
+        {
+          caption: 'Add 1 to property2',
+          click: function(){
+            property2.set(property2.value + 1);
+          }
+        },
+        {
+          caption: 'Add 1 to property1 & property2',
+          click: function(){
+            property1.set(property1.value + 1);
+            property2.set(property2.value + 1);
+          }
+        }
+      ]
+    });
+
+    new basis.ui.Node({
+      container: container,
+      childClass: {
+        template:
+          '<b:define name="value" type="bool"/>' +
+          '<div>' +
+            '{name}: {value} (update count: {updateCount})' +
+          '</div>',
+        binding: {
+          name: 'name',
+          value: 'value',
+          updateCount: 'updateCount'
+        }
+      },
+      childNodes: [
+        {
+          name: 'Property1.value',
+          value: property1,
+          updateCount: new basis.data.value.Expression(property1, function(){
+            return property1.updateCount;
+          })
+        },
+        {
+          name: 'Property2.value',
+          value: property2,
+          updateCount: new basis.data.value.Expression(property2, function(){
+            return property2.updateCount;
+          })
+        },
+        {
+          name: 'ObjectSet.value (sum of property1.value & property2.value)',
+          value: dataObjectSet,
+          updateCount: new basis.data.value.Expression(dataObjectSet, function(){
+            return dataObjectSet.updateCount;
+          })
+        }
+      ]
+    });
+
+  </script>  
+</body>
+
+</html>

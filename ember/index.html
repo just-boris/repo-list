@@ -1,0 +1,132 @@
+<html>
+<head>
+    <title>My projects</title>
+    <meta charset="utf-8">
+    <link href="//netdna.bootstrapcdn.com/bootstrap/3.0.0/css/bootstrap.min.css" rel="stylesheet">
+    <link href="//netdna.bootstrapcdn.com/font-awesome/3.2.1/css/font-awesome.css" rel="stylesheet">
+    <link href="../assets/styles.css" rel="stylesheet">
+    <script type="text/javascript">
+        var _gaq = _gaq || [];
+        _gaq.push(['_setAccount', 'UA-39285873-1']);
+        _gaq.push(['_trackPageview']);
+
+        (function() {
+            var ga = document.createElement('script');
+            ga.type = 'text/javascript';
+            ga.async = true;
+            ga.src = ('https:' == document.location.protocol ? 'https://ssl' : 'http://www') + '.google-analytics.com/ga.js';
+            var s = document.getElementsByTagName('script')[0];
+            s.parentNode.insertBefore(ga, s);
+        })();
+    </script>
+</head>
+<body>
+<nav class="navbar navbar-default" role="navigation">
+    <ul class="nav navbar-nav">
+        <li><a>Choose version:</a></li>
+        <li class="divider-vertical"></li>
+        
+            <li class="framework "><a href="../angular">angular</a></li>
+        
+            <li class="framework "><a href="../basis">basis</a></li>
+        
+            <li class="framework active"><a href="../ember">ember</a></li>
+        
+            <li class="framework "><a href="../marionette">marionette</a></li>
+        
+            <li class="framework "><a href="../noscript">noscript</a></li>
+        
+            <li class="framework "><a href="../react">react</a></li>
+        
+    </ul>
+    <ul class="nav navbar-nav navbar-right">
+        <li class=""><a href="https://github.com/just-boris/repo-list">Code on Github</a></li>
+        <li class=""><a href="/">Back to Catatron</a></li>
+    </ul>
+</nav>
+<div class="container"></div>
+
+<script type="text/x-handlebars" data-template-name="repos">
+    <p>I have written some own projects. So, I have published on Github the most interesting of them in my opinion.</p>
+    <div class="filters">
+        <div class="btn-group">
+            <button type="button" {{bind-attr class=":btn :btn-default showForks::active"}} {{action 'hideForks'}}>Only own</button>
+            <button type="button" {{bind-attr class=":btn :btn-default showForks:active"}} {{action 'showForks'}}>Include forks</button>
+        </div>
+        <form class="form-inline pull-right" role="form">
+            {{view Ember.Select content=languages value=lang prompt="All languages" classNames="form-control"}}
+        </form>
+    </div>
+    {{#each repositories}}
+        <div class="repo">
+            <div class="repo-language"><em>{{language}}</em></div>
+            <h3>
+                {{#if homepage}}
+                    <a {{bindAttr href="homepage"}}>{{name}}</a>
+                {{else}}
+                    <span>{{name}}</span>
+                {{/if}}
+                <a class="github-repo" title="Код на Github" {{bindAttr href="html_url"}}><i class="icon-github"></i></a>
+                {{#if fork}}
+                    <i class="icon-code-fork" title="Форкнутый репозиторий"></i>
+                {{/if}}
+            </h3>
+            <p>{{description}}</p>
+        </div>
+    {{/each}}
+</script>
+
+
+<script src="//code.jquery.com/jquery-2.1.1.min.js"></script>
+<script src="//builds.handlebarsjs.com.s3.amazonaws.com/handlebars-v1.3.0.js"></script>
+<script src="//builds.emberjs.com/tags/v1.5.1/ember.js"></script>
+<script src="//builds.emberjs.com/tags/v1.0.0-beta.7/ember-data.js"></script>
+<script type="text/javascript">
+    var Repos = Ember.Application.create({
+        rootElement: '.container'
+    });
+    Repos.Router.map(function() {
+        this.resource('repos', { path: '/' });
+    });
+    Repos.ReposController = Ember.ArrayController.extend({
+        actions: {
+            hideForks: function() {
+                this.set('showForks', false);
+            },
+            showForks: function() {
+                this.set('showForks', true);
+            }
+        },
+        languages: function() {
+            function collectLanguages(repos) {
+                var result = [];
+                repos.forEach(function(repo) {
+                    if(result.indexOf(repo.language) === -1) {
+                        result.push(repo.language);
+                    }
+                });
+                return result;
+            }
+            return collectLanguages(this.get('model'));
+        }.property(),
+        repositories: function() {
+            var showForks = this.get('showForks'),
+                lang = this.get('lang');
+            return this.get('model').filter(function(repo) {
+                return (showForks || !repo.fork) &&
+                        (!lang || repo.language === lang);
+            });
+        }.property('showForks', 'lang'),
+        showForks: false
+    });
+    Repos.ReposRoute = Ember.Route.extend({
+        model: function() {
+            return Ember.$.getJSON('https://api.github.com/users/just-boris/repos');
+        }
+    });
+</script>
+
+</body>
+</html>
+
+

@@ -1,0 +1,166 @@
+<html>
+<head>
+    <title>My projects</title>
+    <meta charset="utf-8">
+    <link href="//netdna.bootstrapcdn.com/bootstrap/3.0.0/css/bootstrap.min.css" rel="stylesheet">
+    <link href="//netdna.bootstrapcdn.com/font-awesome/3.2.1/css/font-awesome.css" rel="stylesheet">
+    <link href="../assets/styles.css" rel="stylesheet">
+    <script type="text/javascript">
+        var _gaq = _gaq || [];
+        _gaq.push(['_setAccount', 'UA-39285873-1']);
+        _gaq.push(['_trackPageview']);
+
+        (function() {
+            var ga = document.createElement('script');
+            ga.type = 'text/javascript';
+            ga.async = true;
+            ga.src = ('https:' == document.location.protocol ? 'https://ssl' : 'http://www') + '.google-analytics.com/ga.js';
+            var s = document.getElementsByTagName('script')[0];
+            s.parentNode.insertBefore(ga, s);
+        })();
+    </script>
+</head>
+<body>
+<nav class="navbar navbar-default" role="navigation">
+    <ul class="nav navbar-nav">
+        <li><a>Choose version:</a></li>
+        <li class="divider-vertical"></li>
+        
+            <li class="framework "><a href="../angular">angular</a></li>
+        
+            <li class="framework "><a href="../basis">basis</a></li>
+        
+            <li class="framework "><a href="../ember">ember</a></li>
+        
+            <li class="framework "><a href="../marionette">marionette</a></li>
+        
+            <li class="framework "><a href="../noscript">noscript</a></li>
+        
+            <li class="framework active"><a href="../react">react</a></li>
+        
+    </ul>
+    <ul class="nav navbar-nav navbar-right">
+        <li class=""><a href="https://github.com/just-boris/repo-list">Code on Github</a></li>
+        <li class=""><a href="/">Back to Catatron</a></li>
+    </ul>
+</nav>
+<div class="container"></div>
+<script src="//fb.me/react-0.10.0.js"></script>
+<script src="//fb.me/JSXTransformer-0.10.0.js"></script>
+<script src="//code.jquery.com/jquery-1.10.0.min.js"></script>
+<script type="text/javascript">
+    Object.keys(React.DOM).forEach(function(tag) {
+        window[tag] = React.DOM[tag];
+    });
+    var Repo = React.createClass({
+        render: function() {
+            var repo = this.props.data;
+            return div({className: "repo"},
+                div({className: "repo-language"}, em(null, repo.language)),
+                h3(null,
+                    repo.homepage ? a({href: repo.homepage}, repo.name) : span(null, repo.name),
+                    " ",
+                    a({className: "github-repo", title: "Код на Github", href: repo.html_url},
+                            i({className: "icon-github"})
+                    ),
+                    " ",
+                    repo.fork ? i({className: "icon-code-fork", show: "repo.fork", title: "Форкнутый репозиторий"}) : ''
+                ),
+                p(null, repo.description)
+            );
+        }
+    });
+    var RepoList = React.createClass({
+        render: function() {
+            return div(null, this.props.data.map(function(repo) {
+                return Repo({data: repo, key: repo.id});
+            }));
+        }
+    });
+    var RepoFilter = React.createClass({
+        getInitialState: function() {
+            return this.props.filters;
+        },
+        showForks: function() {
+            this.setState({forks: true}, this.onChange);
+        },
+        hideForks: function() {
+            this.setState({forks: false}, this.onChange);
+        },
+        changeLang: function(event) {
+            this.setState({lang: event.target.value}, this.onChange);
+        },
+        onChange: function() {
+            this.props.onChange(this.state)
+        },
+        render: function() {
+            return div({className: "filters"},
+                div({className: "btn-group"},
+                    button({type: "button", className: "btn btn-default "+(!this.state.forks && 'active'), onClick: this.hideForks}, "Only own"),
+                    button({type: "button", className: "btn btn-default "+(this.state.forks && 'active'), onClick: this.showForks}, "Include forks")
+                ),
+                form({className: "form-inline pull-right", role: "form"},
+                    select({className: "form-control", onChange: this.changeLang},
+                        option({value: ""}, "All languages"),
+                        this.props.langs.map(function(lang) {
+                            return option({value: lang}, lang)
+                        })
+                    )
+                )
+            );
+        }
+    });
+    var RepoApp = React.createClass({
+        getDefaultProps: function() {
+            return {data: [], langs: []};
+        },
+        getInitialState: function() {
+            return {filters: {forks: false}};
+        },
+        componentWillMount: function() {
+            $.getJSON(this.props.url)
+                .done(this.onLoadData)
+                .fail(function(xhr, status, err) {
+                    console.error(this.props.url, status, err.toString());
+                }.bind(this));
+        },
+        onLoadData: function(data) {
+            function collectLanguages(repos) {
+                var result = [];
+                repos.forEach(function(repo) {
+                    if(result.indexOf(repo.language) === -1)  {
+                        result.push(repo.language);
+                    }
+                });
+                return result;
+            }
+            this.props.data = data;
+            this.props.langs = collectLanguages(data);
+            this.setState({});
+        },
+        updateRepos: function(filters) {
+            this.setState({filters: filters});
+        },
+        render: function() {
+            return div(null,
+                p(null, "I have written some own projects. So, I have published on Github the most interesting of them in my opinion."),
+                RepoFilter({filters: this.state.filters, langs: this.props.langs, onChange: this.updateRepos}),
+                RepoList({
+                    data: this.props.data.filter(function(repo) {
+                        return (this.state.filters.forks || !repo.fork) &&
+                            (!this.state.filters.lang || repo.language === this.state.filters.lang);
+                    }, this)
+                })
+            );
+        }
+    });
+    React.renderComponent(
+        RepoApp({url: "https://api.github.com/users/just-boris/repos"}),
+        document.querySelector('.container')
+    );
+</script>
+
+</body>
+</html>
+
+

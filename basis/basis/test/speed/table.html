@@ -1,0 +1,272 @@
+<!doctype html>
+
+<html>
+
+<head>
+  <meta http-equiv="Content-type" content="text/html; charset=utf-8" />
+  <title>Speed Test: Basis Table</title>
+
+  <style type="text/css">
+    HTML,
+    BODY
+    {
+      width: 100%;
+      height: 100%;
+      margin: 0;
+      padding: 0;
+      font-size: small;
+      font-family: Tahoma, Verdana, Arial, sans-serif;
+    }
+    #table
+    {
+      margin: .5em;
+    }
+    #table TD,
+    #table TH
+    {
+      font-size: 90%;
+    }
+    #table TD.bold,
+    #table TH.bold
+    {
+      font-weight: bold;
+    }
+    #table TD.italic,
+    #table TH.italic
+    {
+      font-style: italic;
+    }
+    .match
+    {
+      background: gold;
+    }
+  </style>
+  <!--[if lt IE 7]>
+  <style type="text/css">
+    BODY,
+    TABLE *
+    {
+      font-size: x-small;
+    }
+  </style>
+  <![endif]-->
+
+  <script type="text/javascript" data-basis-config src="../../src/basis.js"></script>
+</head>
+
+<body>
+  <div id="control_panel" style="border: 2px solid #808080; background: #F0F0F0; margin: .25em; padding: .5em">
+    <input type="text" id="rowCount"/><button onclick="setRowCount(basis.dom.get('rowCount').value)">gen rows</button><span id="time"></span><br/>
+    <button onclick="TestTable.clear()">clear</button>
+    <div>
+      <label><input type="checkbox" id="logEvents"/> log events</label>
+      <label><input type="checkbox" id="multipleSelection"/> multiple selection (using CTRL)</label>
+      <label><input type="checkbox" id="useGrouping"/> use grouping</label>
+    </div>
+  </div>
+  <script type="text/javascript">
+    
+    (function(){
+      basis.require('basis.dom');
+      basis.require('basis.dom.event');
+      basis.require('basis.data.index');
+      basis.require('basis.data.generator');
+      basis.require('basis.ui.field');
+      basis.require('basis.ui.table');
+      basis.require('basis.utils.benchmark');
+
+      var DOM = basis.dom;
+      var Event = basis.dom.event;
+      var getTime = basis.utils.benchmark.time;
+
+      setRowCount = function(value){
+        DOM.get('rowCount').value = value;
+        if (isNaN(value)) 
+          DOM.get('time').innerHTML = '<span style=color:red>&quot;<b>' + value + '</b>&quot; is not a number</span>';
+        else 
+          genRows(Number(value)); 
+      };
+
+      DOM.insert('control_panel', [1, 10, 100, 250, 500, 1000].map(function(item){ 
+        var btn = DOM.createElement('button', item); 
+        Event.addHandler(btn, 'click', function(){ setRowCount(item); });
+        Event.onUnload(function(){ Event.clearHandlers(btn); });
+        return btn;
+      }), 'begin');
+
+      //var testASum, testASum2;
+      var logEventCheckbox = DOM.get('logEvents');
+      var useSetChildNodes = DOM.get('useSetChildNodes');
+      var useGrouping = DOM.get('useGrouping');
+      var multipleSelection = DOM.get('multipleSelection');
+
+      Event.addHandler(useGrouping, 'click', function(){
+        TestTable.setGrouping(this.checked ? grouping : null);
+      }, useGrouping);
+
+      Event.addHandler(multipleSelection, 'click', function(){
+        TestTable.selection.clear();
+        TestTable.selection.multiple = this.checked;
+      }, multipleSelection);
+
+      var grouping = {
+        rule: function(node){
+          if (node.data.count >= 0)
+            return 'greates or equal 0';
+          else
+            return ' less than 0';
+        },
+        sorting: 'data.title'
+      };
+          
+      TestTable = new basis.ui.table.Table({
+        container: document.body,
+        template: '<b:include src="basis.ui.table.Table" id="table"/>',
+
+        selection: {
+          multiple: multipleSelection.checked
+        },
+        grouping: useGrouping.checked ? grouping : null,
+        handler: {
+          '*': function(){
+            if (logEventCheckbox.checked)
+              basis.dev.log(arguments);
+          }
+        },
+        //sorting: basis.getter('data.id', Number),
+        structure: [
+          /*{ 
+            header: {
+              content: '#'
+            },
+
+            body: {
+              content: '{posText}'
+            }
+          },
+          { 
+            header: {
+              content: '#G'
+            },
+
+            body: {
+              content: '{groupPosText}'
+            }
+          },*/
+          { 
+            header: {
+              content: 'PU'
+            },
+
+            body: {
+              content: basis.getter('repaintCount')
+            }
+          },
+          { 
+            sorting: basis.getter('data.id', Number),
+            cssClassName: 'right',
+
+            header: {
+              content: 'id'
+            },
+
+            body: {
+              content: basis.getter('data.id')
+            },
+
+            footer: {
+              cssClassName: 'right',
+              content: 'Total:'
+            }
+          },
+          { 
+            header: {
+              content: 'Rnd'
+            },
+
+            body: {
+              content: function(node){
+                return Math.random().toFixed(4);
+              }
+            }
+          },
+          { 
+            sorting: basis.getter('data.title', String.toLowerCase),
+
+            header: {
+              content: 'title'
+            },
+
+            body: {
+              content: basis.getter('data.title')
+            }
+          },
+          { 
+            sorting: basis.getter('data.amount', Number),
+            cssClassName: 'right',
+
+            header: {
+              cssClassName: 'bold',
+              content: 'amount'
+            },
+
+            body: {
+              cssClassName: 'italic',
+              content: basis.getter('data.amount', '${0:.2}')
+            }
+          },
+          { 
+            sorting: basis.getter('data.count', Number),
+            cssClassName: 'right',
+
+            header: {
+              content: 'count'
+            },
+
+            body: {
+              content: basis.getter('data.count', Number)
+            }
+          }
+        ]
+      });
+
+      var stringcache = [];
+      function genRows(count){
+        var d1 = getTime();
+        TestTable.clear();
+        var clearTime = getTime(d1);
+
+        var data = [];
+        for (var i = 0; i < count; i++)
+          data.push({
+            data: {
+              id:     basis.data.generator.number(0, 0, 10000), 
+              title:  stringcache[i] || (stringcache[i] = basis.data.generator.string(2, 50)), 
+              amount: basis.data.generator.number(2, -1000, 1000), 
+              count:  basis.data.generator.number(0, -10, 10)
+            }
+          });
+
+        var d = getTime();
+
+        TestTable.setChildNodes(data);
+
+        DOM.get('time').innerHTML = '<b>' + count + '</b> row(s) generates in <b>' + (getTime(d) / 1000).toFixed(3) + '</b> sec (' + (clearTime / 1000).toFixed(3) + ')';
+      };
+      basis.ready(function(){
+        setRowCount(10);
+      });
+
+      var field = new basis.ui.field.MatchInput({
+        matchFilter: {
+          node: TestTable,
+          textNodeGetter: 'element.childNodes[5].firstChild'
+        }
+      });
+      DOM.insert(document.body, field.element, DOM.INSERT_BEFORE, TestTable.element);
+
+    })();
+  </script>
+</body>
+
+</html>

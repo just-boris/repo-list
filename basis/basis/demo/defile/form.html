@@ -1,0 +1,253 @@
+﻿<!doctype html>
+
+<html>
+
+<head>
+  <meta http-equiv="Content-type" content="text/html; charset=utf-8" />
+
+  <title>Basis.js demos: Forms</title>
+
+  <style type="text/css" id="demo-css">
+    HTML,
+    BODY
+    {
+      font-size: small;
+      font-family: Tahoma, Verdana, Arial, sans-serif;
+    }
+
+    .DemoBlock
+    {
+      background: white;
+      border: 1px solid #D0D0D0;
+      border-radius: 3px;
+      padding: 15px;
+      margin: 0 0 .5em;
+      position: relative;
+    }
+    .DemoBlock H2
+    {
+      font-size: 80%;
+      font-weight: normal;
+      background: #EEE;
+      margin: -15px -15px 10px -15px;
+      padding: 2px 2px 2px 1.5em;
+    }
+  </style>
+  <!--[if lt IE 7]>
+  <style type="text/css">
+    BODY
+    {
+      font-size: x-small;
+    }
+  </style>
+  <![endif]-->
+
+  <script type="text/javascript" data-basis-config src="../../src/basis.js"></script>
+
+  <script type="text/javascript" src="../demo.js"></script>
+</head>
+
+<body>
+  <div id="demo-container"></div>
+
+  <script type="text/javascript" id="demo-javascript">
+
+    basis.require('basis.dom');
+    basis.require('basis.dom.event');
+    basis.require('basis.data');
+    basis.require('basis.ui.popup');
+    basis.require('basis.ui.form');
+    basis.require('basis.ui.button');
+
+    
+    // import names
+    var getter = basis.getter;
+
+    var DOM = basis.dom;
+    var Event = basis.dom.event;
+    var nsData = basis.data;
+    var nsForm = basis.ui.form;
+    var nsField = basis.ui.field;
+    var nsButton = basis.ui.button;
+
+    function createBlock(header){
+      return DOM.insert(DOM.get('demo-container'), DOM.createElement('.DemoBlock', DOM.createElement('H2', header)));
+    }
+    function createFieldView(field){
+      return DOM.createElement('.fieldViewer');
+    }
+
+    var _postInit = basis.ui.field.Field.prototype.postInit;
+    basis.ui.field.Field.prototype.postInit = function(){
+      _postInit.apply(this, arguments);
+      DOM.insert(DOM.get('demo-container'), createFieldView(this));
+    };
+
+
+    new nsField.Text({
+      container: createBlock('basis.ui.field.Text'),
+      value: 'text field'
+    });
+
+    new nsField.Password({
+      container: createBlock('basis.ui.field.Password'),
+      value: 'password'
+    });
+
+    new nsField.File({
+      container: createBlock('basis.ui.field.File'),
+      value: 'file'
+    });
+
+    new nsField.Textarea({
+      container: createBlock('basis.ui.field.Textarea'),
+      maxLength: 20
+    });
+
+    new nsField.Select({
+      value: 2,
+      childNodes: [
+        {
+          title: 'Option 1',
+          value: 1
+        },
+        {
+          title: 'Option 2',
+          value: 2
+        },
+        {
+          title: 'Option 3',
+          value: 3
+        }
+      ],
+      container: createBlock('Select Field')
+    });
+
+    var property = new nsData.value.Property(1);
+
+    new nsField.Combobox({
+      childNodes: [
+        {
+          title: 'Combobox Item 1',
+          value: 1
+        },
+        {
+          title: 'Combobox Item 2',
+          value: 2,
+          selected: true
+        },
+        {
+          title: 'Combobox Item 3',
+          value: 3
+        }
+      ],
+      property: property,
+      title: 'Combobox Title',
+      name: 'test',
+      example: 'Sample',
+      container: createBlock('Combobox Field')
+    });
+
+    new nsField.RadioGroup({
+      container: createBlock('RadioGroup Field'),
+      name: 'combo1',
+      value: 2,
+      childNodes: [
+        {
+          title: 'Radio Item 1',
+          value: 1
+        },
+        {
+          title: 'Radio Item 2',
+          value: 2
+        },
+        {
+          title: 'Radio Item 3',
+          value: 3
+        }
+      ]
+    });
+
+    var checkGroup = new nsField.CheckGroup({
+      container: createBlock('CheckGroup Field'),
+      childNodes: [
+        {
+          title: 'Check Item 1',
+          value: 1
+        },
+        {
+          title: 'Check Item 2',
+          value: 2
+        },
+        {
+          title: 'Check Item 3',
+          value: 3,
+          selected: true
+        }
+      ]
+    });
+
+    // form
+
+
+    var formContainer = createBlock('Form');
+
+    var form = new nsForm.FormContent({
+      childNodes: [
+        {
+          type: 'label',
+          value: 'Read only field - it\'s just a text'
+        },
+        {
+          type: 'text',
+          name: 'FirstName',
+          title: 'First Name',
+          minLength: 10
+        },
+        {
+          type: 'text',
+          name: 'LastName',
+          title: 'Last Name'
+        },
+        {
+          type: 'combobox',
+          name: 'Gender',
+          title: 'Gender',
+          childClass: {
+            titleGetter: basis.getter('data.title'),
+            valueGetter: basis.getter('data.value')
+          },
+          childNodes: [
+            { data: { value: 'Male', title: 'Male' } },
+            { data: { value: 'Female', title: 'Female' } }
+          ]
+        },
+        {
+          type: 'checkbox',
+          name: 'check',
+          title: 'Some checkbox'
+        }
+      ],
+      onSubmit: function(data){
+        alert([
+          'First Name: ' + data.FirstName, 
+          'Last Name: ' + data.LastName, 
+          'Gender: '  + data.Gender
+        ].join('\n'));
+      },
+      container: formContainer
+    });
+
+    new nsButton.Button({
+      caption: 'Submit',
+      click: function(){
+        form.submit();
+      },
+      container: formContainer
+    });
+
+    
+  </script>
+</body>
+
+</html>

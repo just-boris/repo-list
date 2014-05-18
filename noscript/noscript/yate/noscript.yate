@@ -1,0 +1,96 @@
+/*
+ * @fileOverview Common yate templates for noscript
+ */
+
+external scalar ns-url(scalar)
+external scalar ns-generate-url(scalar, object)
+
+layout-params = /.layout-params
+
+models = /.models
+
+//  Ключ для получения моделей по имени.
+//
+key model( models.*, name() ) { . }
+
+// @private
+match / {
+    <div class="ns-root">
+        apply .views.* ns-view
+    </div>
+}
+
+// делает chroot для view и генерит обертку с помощью ns-build-view
+// @private
+match .* ns-view {
+    apply document(.).tree.* ns-build-view
+}
+
+// Главная мода для каждой view
+// Генерит <div class="ns-view-<viewname>"> ... </div>
+// Содержимое view определяется модой ns-view-content
+// @private
+match .* ns-build-view {
+    <div class="ns-view-{ name() }" data-key="{ /.key }">
+        if /.placeholder {
+            @class += ' ns-view-placeholder'
+            apply . ns-view-desc
+        } else {
+
+            @class += apply . ns-view-add-class
+            apply . ns-view-add-attrs
+            if /.async {
+                apply . ns-view-async-content
+            } else {
+
+                // у ns.Box и ns.ViewCollection не бывает is_models_valid
+                if count(/.is_models_valid) && !/.is_models_valid {
+                    apply . ns-view-error-content
+
+                } else {
+                    apply . ns-view-content
+                }
+            }
+        }
+    </div>
+}
+
+// Возможность добавить к блоку view какой-либо класс
+// @public
+match .* ns-view-add-class {
+    // по умолчанию ничего к классу не добавляем
+}
+
+match .* ns-view-add-attrs {
+    // по умолчанию ничего в атрибуты не добавляем
+}
+
+// Содержимое view
+// @public
+match .* ns-view-content {
+    if (/.collection) {
+        // special node child-container for view-collection
+        // so view-collection can has its own html markup
+        <div class="ns-view-container-desc">
+            apply . ns-view-desc
+        </div>
+    } else {
+        apply . ns-view-desc
+    }
+}
+
+match .* ns-view-desc {
+    apply /.views.* ns-view
+}
+
+// Содержимое view при async-инициализации
+// @public
+match .* ns-view-async-content {
+    "async-view-content"
+}
+
+// Часть обязательных моделей не удалось получить или для них вернулась ошибка
+// @public
+match .* ns-view-error-content {
+    "view-error-content"
+}

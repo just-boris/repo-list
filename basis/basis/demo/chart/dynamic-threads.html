@@ -1,0 +1,214 @@
+﻿<!doctype html>
+
+<html>
+
+<head>
+  <meta http-equiv="Content-type" content="text/html; charset=utf-8" />
+
+  <title>Basis.js demos: Chart with dynamic threads</title>
+
+  <style type="text/css" id="demo-css">
+    BODY, HTML
+    {
+      font-size: small;
+      font-family: Tahoma, Verdana, Arial, sans-serif;
+    }
+
+    .Basis-Chart
+    {
+      float: left;
+      margin-right: 2em;
+    }
+
+    .Basis-CheckGroup LABEL
+    {
+      display: block;
+      margin-bottom: 0.5em;
+    }
+    .Basis-CheckGroup LABEL INPUT
+    {
+      margin-left: 0;
+    }
+
+
+    .Basis-Field-Title
+    {
+      font-weight: bold;
+      margin-bottom: 0.5em;
+    }
+
+    .selectionContainer
+    {                 
+      float: left;
+
+      font-size: 75%;
+    }
+
+  </style>
+
+  <script type="text/javascript" data-basis-config src="../../src/basis.js"></script>
+
+  <script type="text/javascript" src="../seedrandom.js"></script>
+  <script type="text/javascript" src="../demo.js"></script>
+
+  <!--[if lt IE 9]>
+  <script type="text/javascript" src="../../src/basis/ext/flashcanvas.js"></script>
+  <![endif]-->
+
+</head>
+
+<body>
+  <div id="demo-container"></div>
+
+  <script type="text/javascript" id="demo-javascript">
+    basis.require('basis.date');
+    basis.require('basis.dom');
+    basis.require('basis.data');
+    basis.require('basis.data.dataset');    
+    basis.require('basis.entity');
+    basis.require('basis.ui.chart');
+    basis.require('basis.ui.field');
+
+    var DOM = basis.dom;
+    var nsEntity = basis.entity;
+    var LinearChart = basis.ui.chart.LinearChart;
+    var nsField = basis.ui.field;
+
+    //
+    // Example
+    //
+
+    var Company = new nsEntity.EntityType({
+      name: 'Company',
+      fields: {
+        Id: nsEntity.StringId,
+        Title: String
+      }
+    });
+
+    var CompanyReport = new nsEntity.EntityType({
+      name: 'CompanyReport',
+      fields: {
+        Date: String,
+        Company: Company,
+        Amount: Number
+      },
+      aliases: {
+        CompanyId: 'Company'
+      }
+    });
+    var reportByCompany = new basis.data.dataset.Split({
+      source: CompanyReport.all,
+      rule: 'data.Company'
+    });
+
+    var companies = [
+      { Id: 'apple', Title: 'Apple' },
+      { Id: 'intel', Title: 'Intel' },
+      { Id: 'google', Title: 'Google' },
+      { Id: 'microsoft', Title: 'Microsoft' },
+      { Id: 'oracle', Title: 'Oracle' }
+    ].map(Company);
+
+    var data = [];
+    var lastValue;
+    var value;
+
+    Math.seedrandom("chart");
+
+    var min = 100000;
+    var max = 5000000;
+    for (var i = 0, company; company = companies[i]; i++)
+    {
+      lastValue = (max - min) * Math.random() + min; // 100 000 - 5 000 000
+      
+      for (var month = 0; month < 120; month++)
+      {
+        value = lastValue + 0.2 * lastValue * (2 * Math.random() - 1); // +/- 20% from last value;
+                         
+        data.push({
+          Company: company,
+          Date: (2011 + Math.floor(month / 12)) + '-' + basis.number.lead(1 + month % 12, 2),
+          Amount: value
+        });
+
+        lastValue = value;
+      }
+    }
+    CompanyReport.all.sync(data);
+
+    var chartCompanies = new nsEntity.EntitySet({ wrapper: Company });
+
+    var chart = new LinearChart({
+      container: DOM.get('demo-container'),
+      width: 800,
+      height: 450,
+
+      selection: true,
+
+      dataSource: reportByCompany.getSubset(Company('microsoft')),
+      sorting: basis.getter('data.Date'),
+      keyGetter: function(object){
+        return object.data.Date;
+      },
+      keyTitleGetter: function(object){
+        var date = object.data.Date.split('-');
+        return basis.date.monthNumToAbbr[date[1] - 1].toLowerCase() + ' ' + date[0];
+      },
+
+      series: {
+        dataSource: chartCompanies,
+        childClass: {
+          sourceGetter: function(object){
+            return reportByCompany.getSubset(object.target);
+          },
+          legendGetter: function(object){
+            return object.data.Title;
+          },
+          keyGetter: basis.getter('data.Date'),
+          valueGetter: basis.getter('data.Amount')
+        }
+      }
+    });
+
+    new nsField.CheckGroup({
+      container: DOM.get('demo-container'),
+      title: 'Companies:',
+      dataSource: Company.all,
+      value: ['apple', 'microsoft'],
+      childClass: {
+        valueGetter: basis.getter('data.Id'),
+        titleGetter: basis.getter('data.Title')
+      },
+      handler: {
+        change: function(){
+          chartCompanies.set(this.getValue());
+        }
+      }
+    });
+
+
+    new basis.ui.Node({
+      container: DOM.get('demo-container'),
+      template: '<div class="selectionContainer"/>',
+      dataSource: chart.selection,
+      childClass: {
+        template: 
+          '<div>{title}</div>',
+
+        binding: {
+          title: {
+            events: 'update',
+            getter: function(node){
+              var date = node.data.Date.split('-');
+              return basis.date.monthNumToAbbr[date[1] - 1].toLowerCase() + ' ' + date[0];
+            }
+          }
+        }
+      }
+    });
+
+  </script>
+</body>
+
+</html>

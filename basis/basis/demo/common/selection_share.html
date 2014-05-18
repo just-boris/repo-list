@@ -1,0 +1,156 @@
+﻿<!doctype html>
+
+<html>
+
+<head>
+  <meta http-equiv="Content-type" content="text/html; charset=utf-8" />
+
+  <title>Basis.js demos: Share selection between controls</title>
+
+
+  <style type="text/css" id="demo-css">
+    HTML,
+    BODY
+    {
+      font-size: small;
+      font-family: Tahoma, Verdana, Arial, sans-serif;
+    }
+
+    .demo-list
+    {
+      float: left;
+      margin-right: 10px;
+    }
+    .demo-list__content
+    {
+      background: white;
+      border: 1px solid #AAA;
+      width: 220px;
+      height: 300px;
+      overflow: auto;
+      overflow-y: scroll;
+      overflow-x: hidden;
+    }
+    .demo-list-item
+    {
+      padding: 4px;
+      border-bottom: 1px solid #E0E0E0;
+      cursor: pointer;
+    }
+    .demo-list-item:hover
+    {
+      background: #F0F0F0;
+    }
+    .demo-list-item_selected
+    {
+      background: gold !important;
+      cursor: default;
+    }
+  </style>
+  <!--[if lt IE 7]>
+  <style type="text/css">
+    BODY
+    {
+      font-size: x-small;
+    }
+  </style>
+  <![endif]-->
+
+  <script type="text/javascript" data-basis-config src="../../src/basis.js"></script>
+
+  <script type="text/javascript" src="../demo.js"></script>
+</head>
+
+<body>
+  <!--
+    This demonstration shows how you can share selection between controls (even particular nodes). Use CTRL for multiple node selection.
+  -->
+
+  <div id="demo-container"></div>
+
+  <script type="text/javascript" id="demo-javascript">
+    basis.require('basis.ui');
+   
+    // data for node
+    var data = [
+      { data: { title: 'Lorem' } },
+      { data: { title: 'Sed' } },
+      { data: { title: 'Pellentesque' } },
+      { data: { title: 'Maecenas' } },
+      { data: { title: 'Letters from A to Z' } }
+    ];
+
+    //
+    // main part
+    //
+
+    // setup selection for control (multiple mode)
+    var sharedSelection = new basis.dom.wrapper.Selection({
+      multiple: true
+    });
+
+    var List = basis.ui.Node.subclass({
+      template:
+        '<div class="demo-list">' +
+          '{name}' +
+          '<div{childNodesElement} class="demo-list__content"/>' +
+        '</div>',
+      binding: {
+        name: 'name'
+      },
+      childClass: {
+        template: '<div class="demo-list-item demo-list-item_{selected}" event-click="select">{title}</div>',
+        binding: {
+          title: 'data:'
+        }
+      }
+    });
+  
+    var node1 = new List({
+      name: 'List 1',
+      selection: sharedSelection, 
+      childNodes: data
+    });
+
+    var node2 = new List({
+      name: 'List 2',
+      selection: sharedSelection,
+      childNodes: data
+    });
+
+    var node3 = new List({
+      name: 'List 3',
+      selection: node2.selection, // pass node2 selection object (it is still sharedSelection)
+      childNodes: data
+    });
+
+    new basis.ui.Node({
+      container: document.getElementById('demo-container'),
+      childNodes: [
+        node1,
+        node2,
+        node3,
+
+        // output of selection content
+        new basis.ui.Node({
+          template: '<div>Selected items:</div>',
+          dataSource: sharedSelection,
+          childClass: {
+            template: '<div>({name}) {title}</div>',
+            binding: {
+              name: function(node){
+                return node.delegate.parentNode.name;
+              },
+              title: function(node){
+                return node.data.title;
+              }
+            }
+          }
+        })
+      ]
+    });
+
+  </script>
+</body>
+
+</html>

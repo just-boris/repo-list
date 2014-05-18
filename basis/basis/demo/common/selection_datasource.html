@@ -1,0 +1,149 @@
+﻿<!doctype html>
+
+<html>
+
+<head>
+  <meta http-equiv="Content-type" content="text/html; charset=utf-8" />
+
+  <title>Basis.js demos: Selection as data source</title>
+
+  <style id="demo-css" type="text/css">
+    #sourceTree,
+    #selectedItemsTree,
+    #selectedItemsByGroupTree
+    {
+      float: left;
+    }
+    #sourceTree H2,
+    #selectedItemsTree H2,
+    #selectedItemsByGroupTree H2
+    {
+      font-size: 150%;
+      font-weight: normal;
+    }
+    #demo-container .Basis-Tree
+    {
+      background: white;
+      border: 1px solid #888;
+      width: 250px;
+      height: 400px;
+      margin-right: 2ex;
+      overflow: auto;
+    }
+  </style>
+
+  <script type="text/javascript" data-basis-config src="../../src/basis.js"></script>
+
+  <script type="text/javascript" src="../demo.js"></script>
+</head>
+
+<body>
+  <div id="demo-container">
+    <div id="demo-panel">
+      <p>Use CTRL key for multiple selection.</p>
+    </div>
+    <div id="sourceTree">
+      <h2>Source tree</h2>
+    </div>
+    <div id="selectedItemsTree">
+      <h2>Selected items</h2>
+    </div>
+    <div id="selectedItemsByGroupTree">
+      <h2>Selected items by group</h2>
+    </div>
+  </div>
+
+  <script id="demo-javascript" type="text/javascript">
+    basis.require('basis.dom');
+    basis.require('basis.data.dataset');
+    basis.require('basis.ui.tree');
+    basis.require('basis.ui.button');
+
+    // button panel
+    new basis.ui.button.ButtonPanel({
+      container: document.getElementById('demo-panel'),
+      childNodes: [
+        {
+          caption: 'Select all',
+          click: function(){
+            tree1.selection.set(basis.dom.axis(tree1, basis.dom.AXIS_DESCENDANT));
+          }
+        },
+        {
+          caption: 'Select first level child nodes',
+          click: function(){
+            tree1.selection.set(tree1.childNodes);
+          }
+        },
+        {
+          caption: 'Clear selection',
+          click: function(){
+            tree1.selection.clear();
+          }
+        }
+      ]
+    });
+
+    //
+    // Master tree
+    //
+    var tree1 = new basis.ui.tree.Tree({
+      container: basis.dom.get('sourceTree'),
+      selection: { multiple: true },
+      childNodes: basis.array.create(8, function(i){
+        return new basis.ui.tree.Folder({
+          data: {
+            id: i,
+            title: 'item #' + i
+          },
+          childNodes: [
+            new basis.ui.tree.Node({
+              data: {
+                title: 'child of item #' + i
+              }
+            })
+          ]
+        });
+      })
+    });
+
+    //
+    // Related tree shows tree1 selected items
+    //
+    var tree2 = new basis.ui.tree.Tree({
+      container: basis.dom.get('selectedItemsTree'),
+      dataSource: tree1.selection
+    });
+
+    //
+    // Related tree shows tree1 selected item groups. Each group also can
+    // be expanded and shows it's content.
+    //
+    var tree3 = new basis.ui.tree.Tree({
+      container: basis.dom.get('selectedItemsByGroupTree'),
+      dataSource: new basis.data.dataset.Split({
+        source: tree1.selection, 
+        rule: basis.getter('data.id % 2', {
+          'NaN': 'Child items',
+          '0': 'Even items',
+          '1': 'Odd items'
+        })
+      }),
+      childClass: basis.ui.tree.Folder.subclass({
+        collapsed: true,
+        childFactory: basis.ui.Node.prototype.childFactory,
+        template:
+          '<b:include src="basis.ui.tree.Folder">' +
+            '<b:after ref="title"> ({childCount})</b:after>' +
+          '</b:include>',
+        init: function(){
+          basis.ui.tree.Folder.prototype.init.call(this);
+
+          this.setDataSource(this.delegate);
+        }
+      })
+    });
+  </script>
+</body>
+
+</html>

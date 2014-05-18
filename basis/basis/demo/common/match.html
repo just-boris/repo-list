@@ -1,0 +1,180 @@
+﻿<!doctype html>
+
+<html>
+
+<head>
+  <meta http-equiv="Content-type" content="text/html; charset=utf-8" />
+
+  <title>Basis.js demos: Using match filter</title>
+
+  <style type="text/css" id="demo-css">
+    HTML,
+    BODY
+    {
+      font-size: small;
+      font-family: Tahoma, Verdana, Arial, sans-serif;
+    }
+
+    .Demo-Section
+    {
+      width: 300px;
+      float: left;
+      margin-right: 10px;
+      padding-right: 10px;
+    }
+
+    .MatchHolder
+    {
+      margin: .25em 0;
+    }
+    .MatchHolder INPUT
+    {
+      width: 300px;
+      box-sizing: border-box;
+    }
+
+    .match
+    {
+      background: gold;
+      padding: 0 1px 0 1px;
+      -webkit-border-radius: 2px;
+      -moz-border-radius: 2px;
+      border-radius: 2px;
+    }
+    .unmatched
+    {
+      display: none;
+    }
+
+    .custom-match
+    {
+      background: #66AA66;
+      text-decoration: underline;
+    }
+
+    .Basis-Tree
+    {
+      background: white;
+      border: 1px solid #AAA;
+      height: 400px;
+      overflow: auto;
+      overflow-y: scroll;
+      overflow-x: hidden;
+    }
+  </style>
+  <!--[if lt IE 7]>
+  <style type="text/css">
+    BODY
+    {
+      font-size: x-small;
+    }
+  </style>
+  <![endif]-->
+
+  <script type="text/javascript" data-basis-config src="../../src/basis.js"></script>
+
+  <script type="text/javascript" src="../demo.js"></script>
+</head>
+
+<body>
+  <div id="demo-container"></div>
+
+  <script type="text/javascript" id="demo-javascript">
+    basis.require('basis.data');
+    basis.require('basis.dom');
+    basis.require('basis.ui.table');
+    basis.require('basis.ui.field');
+    
+    // make shortcut
+    var DOM = basis.dom;
+    var MatchInput = basis.ui.field.MatchInput;
+
+    // data
+    var data = basis.array.sortAsObject(basis.array.repeat([
+      { data: { title: 'Lorem', content: 'Lorem ipsum dolor sit amet, consectetuer adipiscing elit.' } },
+      { data: { title: 'Sed', content: 'Sed metus nibh, sodales a, porta at, vulputate eget, dui.' } },
+      { data: { title: 'Pellentesque', content: 'Pellentesque ut nisl.' } },
+      { data: { title: 'Maecenas', content: 'Maecenas tortor turpis, interdum non, sodales non, iaculis ac, lacus.' } },
+      { data: { title: 'Letters from A to Z', content: 'abcdefghijklmnopqrstuvwxyz' } }
+    ], 5), Math.random);
+
+    var MatchDemo = new basis.ui.Node.subclass({
+      container: document.getElementById('demo-container'),
+      template:
+        '<div class="Demo-Section">' +
+          'Type in:' +
+          '<!--{matchInput}-->' +
+          '<!--{component}-->' +
+        '</div>'
+    });
+
+    // Create a list
+    var list = new basis.ui.Node({
+      template: '<ul/>',
+      childClass: {
+        template: '<li class="{unmatched}">{title}</li>',
+        binding: {
+          title: 'data:',
+          unmatched: {
+            events: 'match unmatch',
+            getter: function(node){
+              return !node.matched;
+            }
+          }
+        }
+      },
+      childNodes: data
+    });
+
+    new MatchDemo({
+      binding: {
+        component: list,
+        matchInput: new MatchInput({
+          template: '<b:include src="basis.ui.field.MatchInput" class="MatchHolder"/>',
+          matchFilter: {
+            textNodeGetter: 'tmpl.title',
+            node: list
+          }
+        })
+      }
+    });
+
+    // Create a table
+    var table = new basis.ui.table.Table({
+      structure: [
+        {
+          header: 'Title',
+          body: { templateRef: 'col1', content: basis.getter('data.title') },
+          sorting: basis.getter('data.title')
+        },
+        {
+          header: 'Content',
+          body: { templateRef: 'col2', content: basis.getter('data.content') }
+        }
+      ],
+      childNodes: data
+    });
+
+    new MatchDemo({
+      binding: {
+        component: table,
+        matchInput: new MatchInput({
+          template: '<b:include src="basis.ui.field.MatchInput" class="MatchHolder"/>',
+          matchFilter: {
+            node: table,
+            textNodeGetter: function(node){
+              return [
+                node.tmpl.col1.firstChild,
+                node.tmpl.col2.firstChild
+              ];
+            },
+            wrapElement: 'A.custom-match'
+          }
+        })
+      }
+    });
+
+  </script>
+</body>
+
+</html>

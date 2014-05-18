@@ -1,0 +1,147 @@
+﻿<!doctype html>
+
+<html>
+
+<head>
+  <meta http-equiv="Content-type" content="text/html; charset=utf-8" />
+
+  <title>Basis.js demos: Consequent loading</title>
+
+  <style type="text/css" id="demo-css">
+    HTML,
+    BODY
+    {
+      font-size: small;
+      font-family: Tahoma, Verdana, Arial, sans-serif;
+    }
+
+    .state-error
+    {
+      color: red;
+    }
+
+  </style>
+  <!--[if lt IE 7]>
+  <style type="text/css">
+    BODY
+    {
+      font-size: x-small;
+    }
+  </style>
+  <![endif]-->
+
+
+  <script type="text/javascript" data-basis-config src="../../src/basis.js"></script>
+
+  <script type="text/javascript" src="../demo.js"></script>
+
+  <style type="text/css">
+    .demo-list DIV.state-processing
+    {
+      background: url(../res/img/loading.gif) no-repeat left center;
+      padding-left: 20px;
+    }
+
+  </style>
+
+</head>
+
+<body>
+  <div id="demo-container"></div>
+
+  <script type="text/javascript" id="demo-javascript">
+    basis.require('basis.data');
+    basis.require('basis.net');
+    basis.require('basis.ui');
+    basis.require('basis.ui.button');
+
+    var titleResolver = new basis.net.Transport({
+      poolLimit: 1,
+      poolHashGetter: function(requestData){
+        return requestData.url;
+      },
+      handler: {
+        success: function(sender, req){
+          var m = req.data.responseText.match(/<title>([^<]*)<\/title>/i);
+          if (m && req.influence[0])
+            req.influence[0].update({ title: m[1] });
+        },
+        failure: function(sender, req){
+          req.influence[0].update({ title: 'Fault to load ' + req.requestData.url });
+        }
+      }
+    });
+
+    var UrlDataObject = basis.Class(basis.data.Object, {
+      adapter: titleResolver,
+      syncAction: function(){
+        this.adapter.request({
+          url: basis.path.resolve('..', this.data.url),
+          influence: [this]
+        });
+      }
+    });
+
+    var list = new basis.ui.Node({
+      template: '<ul class="demo-list"/>',
+
+      syncAction: function(){
+        basis.net.request('../index.html', function(data){
+          var items = [];
+
+          data.replace(/url:\s*\'([^\']+)\'/g, function(m, url){
+            if (url != 'data:')
+              items.push(new UrlDataObject({
+                data: {
+                  url: url
+                }
+              }));
+          });
+
+          this.setChildNodes(items);
+        }.bind(this));
+      },
+
+      childClass: {
+        template:
+          '<li class="state-{state}">' +
+            '{title}' +
+          '</li>',
+
+        binding: {
+          title: {
+            events: 'update',
+            getter: function(node){
+              return node.data.title || node.data.url;
+            }
+          }
+        }
+      }
+    });
+
+    var demoView = new basis.ui.Node({
+      container: document.getElementById('demo-container'),
+      
+      template:
+        '<div>' +
+          '<!--{button}-->' +
+          '<!--{list}-->' +
+        '</div>',
+
+      binding: {
+        button: new basis.ui.button.Button({
+          caption: 'Start loading',
+          click: function(){
+            for (var i = 0, child; child = list.childNodes[i]; i++)
+              child.setActive(true);
+          }
+        }),
+        
+        list: list
+      }
+    });
+    
+  </script>
+</body>
+
+</html>

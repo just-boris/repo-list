@@ -1,0 +1,97 @@
+<html>
+<head>
+    <title>My projects</title>
+    <meta charset="utf-8">
+    <link href="//netdna.bootstrapcdn.com/bootstrap/3.0.0/css/bootstrap.min.css" rel="stylesheet">
+    <link href="//netdna.bootstrapcdn.com/font-awesome/3.2.1/css/font-awesome.css" rel="stylesheet">
+    <link href="../assets/styles.css" rel="stylesheet">
+    <script type="text/javascript">
+        var _gaq = _gaq || [];
+        _gaq.push(['_setAccount', 'UA-39285873-1']);
+        _gaq.push(['_trackPageview']);
+
+        (function() {
+            var ga = document.createElement('script');
+            ga.type = 'text/javascript';
+            ga.async = true;
+            ga.src = ('https:' == document.location.protocol ? 'https://ssl' : 'http://www') + '.google-analytics.com/ga.js';
+            var s = document.getElementsByTagName('script')[0];
+            s.parentNode.insertBefore(ga, s);
+        })();
+    </script>
+</head>
+<body>
+<nav class="navbar navbar-default" role="navigation">
+    <ul class="nav navbar-nav">
+        <li><a>Choose version:</a></li>
+        <li class="divider-vertical"></li>
+        
+            <li class="framework active"><a href="../angular">angular</a></li>
+        
+            <li class="framework "><a href="../basis">basis</a></li>
+        
+            <li class="framework "><a href="../ember">ember</a></li>
+        
+            <li class="framework "><a href="../marionette">marionette</a></li>
+        
+            <li class="framework "><a href="../noscript">noscript</a></li>
+        
+            <li class="framework "><a href="../react">react</a></li>
+        
+    </ul>
+    <ul class="nav navbar-nav navbar-right">
+        <li class=""><a href="https://github.com/just-boris/repo-list">Code on Github</a></li>
+        <li class=""><a href="/">Back to Catatron</a></li>
+    </ul>
+</nav>
+<div ng-app="homeApp" ng-controller="repoController" class="container">
+    <p>I have written some own projects. So, I have published on Github the most interesting of them in my opinion.</p>
+    <div class="filters">
+        <div class="btn-group">
+          <button type="button" class="btn btn-default" ng-class="{active:!showForks}"  ng-click="showForks=false">Only own</button>
+          <button type="button" class="btn btn-default" ng-class="{active:showForks}" ng-click="showForks=true">Include forks</button>
+        </div>
+        <form class="form-inline pull-right" role="form">
+            <select class="form-control" ng-model="lang" ng-options="language for language in languages">
+                <option value="">All languages</option>
+            </select>
+        </form>
+    </div>
+    <div class="repo" ng-repeat = "repo in repos | filter:filterRepos">
+        <div class="repo-language"><em>{{repo.language}}</em></div>
+        <h3>
+            <a ng-if="repo.homepage" ng-href="{{repo.homepage}}">{{repo.name}}</a>
+            <span ng-if="!repo.homepage">{{repo.name}}</span>
+            <a class="github-repo" title="Код на Github" ng-href="{{repo.html_url}}"><i class="icon-github"></i></a>
+            <i class="icon-code-fork" ng-show="repo.fork" title="Форкнутый репозиторий"></i>
+        </h3>
+        <p>{{repo.description}}</p>
+    </div>
+</div>
+<script type="text/javascript" src="http://ajax.googleapis.com/ajax/libs/angularjs/1.2.12/angular.js"></script>
+<script type="text/javascript">
+    angular.module('homeApp', []).controller('repoController', function($scope, $http) {
+        function collectLanguages(repos) {
+            var result = [];
+            repos.forEach(function(repo) {
+                if(result.indexOf(repo.language) === -1)  {
+                    result.push(repo.language);
+                }
+            });
+            return result;
+        }
+        $scope.filterRepos = function(item) {
+            return ($scope.showForks || !item.fork) &&
+                (!$scope.lang || item.language === $scope.lang);
+        };
+        $http.get('https://api.github.com/users/just-boris/repos').then(function(response) {
+            $scope.repos = response.data;
+            $scope.languages = collectLanguages($scope.repos);
+        });
+    });
+</script>
+
+</body>
+</html>
+
+

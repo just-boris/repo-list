@@ -1,0 +1,442 @@
+﻿<!doctype html>
+
+<html>
+
+<head>
+  <meta http-equiv="Content-type" content="text/html; charset=utf-8" />
+
+  <title>Basis.js demos: Dataset</title>
+
+  <style type="text/css" id="demo-css">
+    HTML,
+    BODY
+    {
+      font-size: small;
+      font-family: Tahoma, Verdana, Arial, sans-serif;
+    }
+
+    .img
+    {
+      text-align: center;
+    }
+
+    H2
+    {
+      clear: both;
+      margin: 0 0 .5em;
+      padding-top: 1em;
+      font-size: 100%;
+    }
+
+    .DemoBlock
+    {
+      background: white;
+      border: 1px solid #D0D0D0;
+      padding: 15px;
+      margin: 0 10px .5em 0;
+      overflow: hidden;
+      position: relative;
+      float: left;
+      width: 160px;
+      display: inline-block;
+    }
+    .DemoBlock H3
+    {
+      clear: both;
+      font-size: 85%;
+      font-weight: normal;
+      background: #EEE;
+      margin: 10px -15px -15px -15px;
+      padding: 2px 2px 2px 1.5em;
+      /*text-align: center;*/
+    }
+
+    .DemoBlock .items
+    {
+      min-height: 4em;
+    }
+
+    .item
+    {
+      margin: 2px 0 2px 4px;
+      padding: .2em .75ex;
+      text-align: center;
+      display: inline-block;
+      min-width: 3ex;
+      background: #E0E0E0;
+      color: black;
+      border-radius: 3px;
+      position: relative;
+    }
+    .dsitem
+    {
+      margin: 2px;
+      padding: .2em 4px .2em .75ex;
+      text-align: center;
+      display: inline-block;
+      background: #999999;
+      color: white;
+      border-radius: 3px;
+    }
+    .remove
+    {
+      background: #CC0000;
+      color: white;
+      position: absolute;
+      font-size: 60%;
+      padding: 0 4px 2px;
+      line-height: 1;
+      border-radius: 3px;
+      top: -.5em;
+      right: -.75ex;
+      cursor: pointer;
+      opacity: .6;
+    }
+    .remove:hover
+    {
+      opacity: 1;
+    }
+    BUTTON
+    {
+      margin-left: 1ex;
+    }
+
+  </style>
+  <!--[if lt IE 7]>
+  <style type="text/css">
+    BODY
+    {
+      font-size: x-small;
+    }
+  </style>
+  <![endif]-->
+
+  <script type="text/javascript" data-basis-config src="../../src/basis.js"></script>
+
+  <script type="text/javascript" src="../demo.js"></script>
+</head>
+
+<body>
+  <div id="demo-container">
+  </div>
+
+  <script type="text/javascript" id="demo-javascript">
+    basis.require('basis.dom');
+    basis.require('basis.dom.event');
+    basis.require('basis.data');
+    basis.require('basis.data.dataset');
+    basis.require('basis.ui.popup');
+    basis.require('basis.ui.menu');
+    
+    // import names
+    var DOM = basis.dom;
+    var Event = basis.dom.event;
+    var nsData = basis.data;
+    var Menu = basis.ui.menu.Menu;
+    var UINode = basis.ui.Node;
+    var nsDataset = basis.data.dataset;
+
+    var getter = basis.getter;
+
+    function createHeader(header){
+      return DOM.insert(DOM.get('demo-container'), DOM.createElement('H2', header));
+    }
+
+    function createImage(type){
+      return DOM.createElement('.img',
+        DOM.createElement('IMG[src="dataset_' + type + '.png"][width=120][height=80]')
+      );
+    }
+
+    //
+    // Init data
+    //
+    var data = basis.array.create(10, function(i){
+      return new nsData.Object({
+        data: {
+          value: i + 1
+        }
+      });
+    });
+    var data2 = 'one two three four five six seven eight nine ten'.split(' ').map(function(value){
+      return new nsData.Object({
+        data: {
+          value: value
+        }
+      });
+    });
+
+    var NUMBERS = new nsData.Dataset({
+      items: data
+    });
+    var WORDS = new nsData.Dataset({
+      items: data2
+    });
+
+    var A = new nsData.Dataset({
+      items: [data[0], data[1], data[2], data[3]]
+    });
+    var B = new nsData.Dataset({
+      items: [data[2], data[3], data[4], data[5]]
+    });
+    var C = new nsData.Dataset({
+      items: [data[1], data[2], data[5], data[6]]
+    });
+
+    //
+    // Custom classes & instances
+    //
+    var DatasetViewer = UINode.subclass({
+      container: document.getElementById('demo-container'),
+
+      template:
+        '<div class="DemoBlock">' +
+          '<span{content}/>' +
+          '<div{childNodesElement} class="items"/>' +
+          '<h3>{title}</h3>' +
+        '</div>',
+
+      binding: {
+        title: 'title'
+      },
+
+      childClass: {
+        template:
+          '<span class="item">' +
+            '{value}' +
+          '</span>',
+
+        binding: {
+          value: 'data:'
+        }
+      }
+    });
+
+    var EditableDatasetViewer = UINode.subclass({
+      container: document.getElementById('demo-container'),
+
+      template:
+        '<div class="DemoBlock">' +
+          '<!-- {childNodesHere} -->' +
+          '<button event-click="add">add</button>' +
+          '<h3>{title}</h3>' +
+        '</div>', 
+
+      binding: {
+        title: 'title'
+      },
+
+      action: {
+        add: function(){
+          newItemPopup.dataSource.setSubtrahend(this.dataSource);
+          newItemPopup.show(Event.sender(event));
+        }
+      },
+
+      childClass: {
+        template:
+          '<span class="item">' +
+            '<span class="remove" event-click="remove">x</span>' +
+            '{value}' +
+          '</span>',
+        binding: {
+          value: 'data:'
+        },
+        action: {
+          remove: function(){
+            this.parentNode.dataSource.remove([this.delegate]);
+          }
+        }
+      }
+    });
+
+    var newItemPopup = new Menu({
+      dataSource: new nsDataset.Subtract({
+        minuend: NUMBERS
+      }),
+      sorting: 'data.value',
+      childClass: {
+        binding: {
+          caption: 'data.value'
+        }
+      },
+      defaultHandler: function(node){
+        if (node)
+          this.dataSource.subtrahend.add([node.root]);
+        this.hide();
+      }
+    });
+
+    //
+    // Demo
+    //
+    createHeader('Source datasets');
+
+    new DatasetViewer({
+      title: 'dataset NUMBERS',
+      dataSource: NUMBERS
+    });
+    new DatasetViewer({
+      title: 'dataset WORDS',
+      dataSource: WORDS
+    });
+
+    createHeader('Custom datasets');
+
+    new EditableDatasetViewer({
+      title: 'dataset A',
+      dataSource: A
+    });
+    new EditableDatasetViewer({
+      title: 'dataset B',
+      dataSource: B
+    });
+    new EditableDatasetViewer({
+      title: 'dataset C',
+      dataSource: C
+    });
+
+    createHeader('Operable datasets');
+
+    new DatasetViewer({
+      title: 'Union (A ∪ B ∪ C)',
+      content: createImage('union'),
+      dataSource: new nsDataset.Merge({
+        rule: nsDataset.Merge.UNION,  // by default
+        sources: [A, B, C]
+      })
+    });
+
+    new DatasetViewer({
+      title: 'Intersection (A ∩ B ∩ C)',
+      content: createImage('intersection'),
+      dataSource: I = new nsDataset.Merge({
+        rule: nsDataset.Merge.INTERSECTION,
+        sources: [A, B, C]
+      })
+    });
+
+    new DatasetViewer({
+      title: 'AtLeastOneExclude (A ∪ B ∪ C) / (A ∩ B ∩ C) [union subtract intersection]',
+      content: createImage('atleastoneexclude'),
+      dataSource: new nsDataset.Merge({
+        rule: nsDataset.Merge.AT_LEAST_ONE_EXCLUDE,
+        sources: [A, B, C]
+      })
+    });
+
+    new DatasetViewer({
+      title: 'Difference (A ∆ B ∆ C)',
+      content: createImage('difference'),
+      dataSource: new nsDataset.Merge({
+        rule: nsDataset.Merge.DIFFERENCE,
+        sources: [A, B, C]
+      })
+    });
+
+    new DatasetViewer({
+      title: 'MoreThanOneInclude (A ∪ B ∪ C) / (A ∆ B ∆ C) [union subtract difference]',
+      content: createImage('morethanoneinclude'),
+      dataSource: new nsDataset.Merge({
+        rule: nsDataset.Merge.MORE_THAN_ONE_INCLUDE,
+        sources: [A, B, C]
+      })
+    });
+
+    new DatasetViewer({
+      title: 'Subtract (A / B)',
+      content: createImage('subtract'),
+      dataSource: new nsDataset.Subtract({
+        minuend: A,
+        subtrahend: B
+      })
+    });
+
+    createHeader('MapFilter datasets');
+
+    new DatasetViewer({
+      title: 'MapFilter for dataset A: NUMBERS -> WORDS',
+      dataSource: new nsDataset.MapFilter({
+        map: basis.getter('data.value - 1', data2),
+        source: A
+      })
+    });
+
+    new DatasetViewer({
+      title: 'Subset of dataset A: ONLY ODD',
+      dataSource: new nsDataset.Subset({
+        rule: basis.getter('data.value % 2'),
+        source: A
+      })
+    });
+
+    new DatasetViewer({
+      title: 'Split data A: ODD and EVEN',
+      dataSource: new nsDataset.Split({
+        rule: basis.getter('data.value % 2 ? "odd" : "even"'),
+        source: A
+      }),
+      childClass: UINode.subclass({
+        template:
+          '<span class="dsitem">' +
+            '{title}' +
+          '</span>',
+
+        binding: {
+          title: 'data:'
+        },
+
+        childClass: DatasetViewer.prototype.childClass,
+        init: function(){
+          this.dataSource = this.delegate;
+          UINode.prototype.init.call(this);
+        }
+      })
+    });
+
+    new DatasetViewer({
+      title: 'First 3 item of A',
+      sorting: basis.getter('data.value'),
+      dataSource: new nsDataset.Slice({
+        rule: basis.getter('data.value'),
+        source: A,
+        limit: 3
+      })
+    });
+
+    new DatasetViewer({
+      title: 'Cloud of A: deviders',
+      sorting: basis.getter('data.title'),
+      dataSource: new nsDataset.Cloud({
+        rule: function(item){
+          var res = [];
+          var val = item.data.value;
+          for (var i = val; i > 1; i--)
+            if ((val % i) == 0)
+              res.push(i);
+          return res;
+        },
+        source: A
+      }),
+      childClass: UINode.subclass({
+        template:
+          '<span class="dsitem">' +
+            '{title}' +
+          '</span>',
+
+        binding: {
+          title: 'data:'
+        },
+
+        childClass: DatasetViewer.prototype.childClass,
+        init: function(){
+          this.dataSource = this.delegate;
+          UINode.prototype.init.call(this);
+        }
+      })
+    });
+
+  </script>
+</body>
+
+</html>

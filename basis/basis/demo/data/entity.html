@@ -1,0 +1,241 @@
+﻿<!doctype html>
+
+<html>
+
+<head>
+  <meta http-equiv="Content-type" content="text/html; charset=utf-8" />
+
+  <title>Basis.js demos: Entity basic</title>
+
+  <style type="text/css" id="demo-css">
+    .Basis-Tree
+    {
+      background: white;
+      border: 1px solid #AAA;
+      width: 240px;
+      height: 300px;
+      overflow: auto;
+      overflow-y: scroll;
+      overflow-x: hidden;
+      float: left;
+      margin-right: 10px;
+    }
+
+    .Basis-FormContent
+    {
+      overflow: hidden;
+    }
+
+    #ArticleList
+    {
+      background: white;
+      border: 1px solid #AAA;
+      width: 320px;
+      height: 400px;
+      overflow: auto;
+      overflow-y: scroll;
+      overflow-x: hidden;
+      float: left;
+      margin-right: 10px;
+    }
+    .Article
+    {
+      margin: 2px;
+      padding: 4px;
+      border: 1px solid #E0E0E0;
+      border-radius: 3px;
+      background: #F8F8F8 no-repeat 4px 2px;
+      font-size: 85%;
+      cursor: pointer;
+    }
+    .Article-Title
+    {
+      font-weight: bold;
+    }
+    .Article:hover
+    {
+      border-color: #C0C0C0;
+      background-color: #F0F0F0;
+    }
+    .Article.selected
+    {
+      border-color: #A0D8F0;
+      background-color: #F0F4FF;
+    }
+
+    #EditForm
+    {
+      border-radius: 5px;
+      background: #EEE;
+      padding: 10px;
+      float: left;
+    }
+    #EditForm INPUT,
+    #EditForm TEXTAREA
+    {
+      width: 40ex;
+      font-family: Consolas, Courier New, monospace;
+    }
+    #EditForm TEXTAREA
+    {
+      height: 5em;
+      resize: none;
+    }
+
+    #EditForm .disabled .Basis-Field-Container
+    {
+      opacity: .4;
+    }
+  </style>
+  <!--[if lt IE 7]>
+  <style type="text/css">
+    BODY
+    {
+      font-size: x-small;
+    }
+  </style>
+  <![endif]-->
+
+  <script type="text/javascript" data-basis-config src="../../src/basis.js"></script>
+
+  <script type="text/javascript" src="../demo.js"></script>
+</head>
+
+<body>
+  <div id="demo-container"></div>
+
+  <script id="demo-javascript" type="text/javascript">
+    basis.require('basis.entity');
+    basis.require('basis.ui');
+    basis.require('basis.ui.form');
+    basis.require('basis.ui.button');
+    
+    // define data type
+    var Article = new basis.entity.EntityType({
+      name: 'Article',
+      fields: {
+        id: basis.entity.IntId,
+        title: String,
+        content: String
+      }
+    });
+
+    // generate data
+    for (var i = 1; i <= 8; i++)
+      Article({
+        id: i,
+        title: 'title #' + i,
+        content: 'content #' + i
+      });
+
+    // article node
+    var ArticleNode = basis.Class(basis.ui.Node, {
+      template:
+        '<div class="Article {selected}" event-click="select">' +
+          '<div class="Article-Title">[{id}] {title}</div>' +
+          '<div class="Article-Content">{content}</div>' +
+        '</div>',
+      binding: {
+        id: 'data:',
+        title: 'data:',
+        content: 'data:'
+      }
+    });
+
+    // list
+    var myList = new basis.ui.Node({
+      template: '<div id="ArticleList"/>',
+
+      dataSource: Article.all,
+      childClass: ArticleNode,
+      sorting: 'data.title',
+
+      selection: {
+        handler: {
+          itemsChanged: function(){
+            myForm.setDelegate(this.pick());
+          }
+        }
+      }
+    });
+
+    // form
+    var myForm = new basis.ui.form.FormContent({
+      disabled: true,
+      childNodes: [
+        {
+          type: 'text',
+          name: 'title',
+          title: 'Title'
+        },
+        {
+          type: 'textarea',
+          name: 'content',
+          title: 'Content'
+        }
+      ],
+
+      handler: {
+        delegateChanged: function(){
+          if (this.delegate)
+          {
+            this.loadData(this.data);
+            this.enable();
+          }
+          else
+          {
+            this.reset();
+            this.disable();
+          }
+        }
+      }
+    });
+
+    // panel
+    var myButtonPanel = new basis.ui.button.ButtonPanel({
+      childNodes: [
+        {
+          caption: 'Save',
+          click: function(){
+            myForm.update(myForm.serialize());
+          }
+        },
+        {
+          caption: 'Reset',
+          click: function(){
+            myForm.loadData(myForm.data);
+          }
+        }
+      ]
+    });
+
+    // add views to document
+    var myEditor = new basis.ui.Node({
+      template:
+        '<div id="EditForm">' +
+          '<!--{form}-->' +
+          '<!--{buttonPanel}-->' +
+        '</div>',
+      binding: {
+        form: myForm,
+        buttonPanel: myButtonPanel
+      }
+    });
+
+    new basis.ui.Node({
+      container: document.getElementById('demo-container'),
+      template:
+        '<div>' +
+          '<!--{articleList}-->' +
+          '<!--{editor}-->' +
+        '</div>',
+      binding: {
+        articleList: myList,
+        editor: myEditor
+      }
+    });
+
+  </script>  
+</body>
+
+</html>

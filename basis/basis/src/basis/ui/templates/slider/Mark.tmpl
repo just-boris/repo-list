@@ -1,0 +1,14 @@
+
+  <b:resource src="Mark.css"/>
+  <b:define name="selected" type="bool"/>
+  <b:define name="disabled" type="bool"/>
+  <b:define name="last" type="bool"/>
+  <b:define name="range" type="bool"/>
+
+  <div class="Basis-Slider-Mark {last} {range} {selected} {disabled}" style="left: {pos}%; width: {width}%">
+    <span class="Basis-Slider-Mark-CaptionWrapper">
+      <span class="Basis-Slider-Mark-Caption">
+        {text}
+      </span>
+    </span>
+  </div>

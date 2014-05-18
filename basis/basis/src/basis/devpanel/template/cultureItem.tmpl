@@ -1,0 +1,11 @@
+<b:resource src="cultureItem.css"/>
+<b:define name="base" type="bool"/>
+
+<b:include src="app.menu.Item" class="Devpanel-CultureMenuItem {base}">
+  <b:replace ref="title">
+    <div class="flag" style="background-position: -{spriteX}px -{spriteY}px;"></div>
+    <span>
+      {title}
+    </span>
+  </b:replace>
+</b:include>

@@ -1,0 +1,109 @@
+﻿<!doctype html>
+
+<html>
+
+<head>
+  <meta http-equiv="Content-type" content="text/html; charset=utf-8" />
+
+  <title>Basis.js demos: Tree</title>
+
+  <style type="text/css" id="demo-css">
+    HTML,
+    BODY
+    {
+      font-size: small;
+      font-family: Tahoma, Verdana, Arial, sans-serif;
+    }
+
+    #DemoTree
+    {
+      background: white;
+      border: 1px solid #AAA;
+      width: 300px;
+      height: 400px;
+      overflow: auto;
+      overflow-y: scroll;
+      overflow-x: hidden;
+    }
+  </style>
+  <!--[if lt IE 7]>
+  <style type="text/css">
+    BODY
+    {
+      font-size: x-small;
+    }
+  </style>
+  <![endif]-->
+
+  <script type="text/javascript" data-basis-config src="../../src/basis.js"></script>
+
+  <script type="text/javascript" src="../demo.js"></script>
+</head>
+
+<body>
+  <div id="demo-container"></div>
+
+  <script type="text/javascript" id="demo-javascript">
+    basis.require('basis.dom');
+    basis.require('basis.ui.tree');
+    
+    // make shortcut
+    var dom = basis.dom;
+    var nsTree = basis.ui.tree;
+
+    // data for tree
+    var data = [
+      { data: { id: 1, title: 'node1' } },
+      { data: { id: 2, title: 'node2' },
+        childNodes: [
+          { data: { title: 'node2.1' } },
+          { data: { title: 'node2.1' } }
+        ]
+      },
+      { data: { id: 3, title: 'node3' },
+        childNodes: [
+          { data: { title: 'node3.1' } },
+          { data: { title: 'node3.2' } },
+          { data: { title: 'node3.3' },
+            childNodes: [
+              { data: { title: 'node3.3.1' } },
+              { data: { title: 'node3.3.2' } },
+              { data: { title: 'node3.3.3' } },
+              { data: { title: 'node3.3.4' } },
+              { data: { title: 'node3.3.5' } }
+            ]
+          }
+        ]
+      },
+      { data: { id: 4, title: 'node4' } },
+      { data: { id: 5, title: 'node5' } }
+    ];
+
+    // create a tree
+    new nsTree.Tree({
+      container: dom.get('demo-container'),
+      template: '<b:include src="basis.ui.tree.Tree" id="DemoTree"/>',
+
+      sorting: basis.getter('title'),
+      sortingDesc: true,
+      grouping: {
+        rule: 'data.id % 2',
+        childClass: {
+          binding: {
+            title: basis.getter('data.id', { 0: 'even', 1: 'odd' })
+          }
+        }
+      },
+      childFactory: function(config){
+        if (config.childNodes)
+          return new nsTree.Folder(basis.object.extend({ childFactory: this.childFactory }, config));
+        else
+          return new nsTree.Node(config);
+      },
+      childNodes: data
+    });
+
+  </script>
+</body>
+
+</html>

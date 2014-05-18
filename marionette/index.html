@@ -1,0 +1,157 @@
+<html>
+<head>
+    <title>My projects</title>
+    <meta charset="utf-8">
+    <link href="//netdna.bootstrapcdn.com/bootstrap/3.0.0/css/bootstrap.min.css" rel="stylesheet">
+    <link href="//netdna.bootstrapcdn.com/font-awesome/3.2.1/css/font-awesome.css" rel="stylesheet">
+    <link href="../assets/styles.css" rel="stylesheet">
+    <script type="text/javascript">
+        var _gaq = _gaq || [];
+        _gaq.push(['_setAccount', 'UA-39285873-1']);
+        _gaq.push(['_trackPageview']);
+
+        (function() {
+            var ga = document.createElement('script');
+            ga.type = 'text/javascript';
+            ga.async = true;
+            ga.src = ('https:' == document.location.protocol ? 'https://ssl' : 'http://www') + '.google-analytics.com/ga.js';
+            var s = document.getElementsByTagName('script')[0];
+            s.parentNode.insertBefore(ga, s);
+        })();
+    </script>
+</head>
+<body>
+<nav class="navbar navbar-default" role="navigation">
+    <ul class="nav navbar-nav">
+        <li><a>Choose version:</a></li>
+        <li class="divider-vertical"></li>
+        
+            <li class="framework "><a href="../angular">angular</a></li>
+        
+            <li class="framework "><a href="../basis">basis</a></li>
+        
+            <li class="framework "><a href="../ember">ember</a></li>
+        
+            <li class="framework active"><a href="../marionette">marionette</a></li>
+        
+            <li class="framework "><a href="../noscript">noscript</a></li>
+        
+            <li class="framework "><a href="../react">react</a></li>
+        
+    </ul>
+    <ul class="nav navbar-nav navbar-right">
+        <li class=""><a href="https://github.com/just-boris/repo-list">Code on Github</a></li>
+        <li class=""><a href="/">Back to Catatron</a></li>
+    </ul>
+</nav>
+<div class="app container"></div>
+
+<script type="text/template" id="filters">
+    <p>I have written some own projects. So, I have published on Github the most interesting of them in my opinion.</p>
+    <div class="filters">
+        <div class="btn-group">
+            <button type="button" data-forks="false" class="btn btn-default <%= forks ? '' : 'active' %>">Only own</button>
+            <button type="button" data-forks="true" class="btn btn-default <%= forks ? 'active' : '' %>">Include forks</button>
+        </div>
+        <form class="form-inline pull-right" role="form">
+            <select class="form-control">
+                <option value="">All languages</option>
+                <% langs.forEach(function(lang) { %>
+                    <option><%= lang %></option>
+                <% }) %>
+            </select>
+        </form>
+    </div>
+    <div class="repos"></div>
+</script>
+<script type="text/template" id="repo-item">
+    <div class="repo">
+        <div class="repo-language"><em><%= language %></em></div>
+        <h3>
+            <% if (homepage) { %>
+            <a href="<%= homepage %>"><%= name %></a>
+            <% } else {%>
+            <span><%= name %></span>
+            <% } %>
+            <a class="github-repo" title="Код на Github" href="<%= html_url %>"><i class="icon-github"></i></a>
+            <% if (fork) { %>
+            <i class="icon-code-fork" title="Форкнутый репозиторий"></i>
+            <% } %>
+        </h3>
+        <p><%= description %></p>
+    </div>
+</script>
+
+<script src="//code.jquery.com/jquery-2.1.1.min.js"></script>
+<script src="//yandex.st/underscore/1.6.0/underscore-min.js"></script>
+<script src="//yandex.st/backbone/1.1.2/backbone-min.js"></script>
+<script src="//cdnjs.cloudflare.com/ajax/libs/backbone.marionette/1.8.0/backbone.marionette.js"></script>
+<script type="text/javascript">
+    var RepoCollection = Backbone.Collection.extend({
+            url: "https://api.github.com/users/just-boris/repos"
+        }),
+        AppView = Backbone.Marionette.CompositeView.extend({
+            template: '#filters',
+            itemViewContainer: '.repos',
+            itemView: Backbone.Marionette.ItemView.extend({
+                template: '#repo-item'
+            }),
+            events: {
+                'change select': function(e) {
+                    this.model.set('lang', e.target.value)
+                },
+                'click [data-forks="true"]': function() {
+                    this.model.set('forks', true);
+                },
+                'click [data-forks="false"]': function() {
+                    this.model.set('forks', false);
+                }
+            },
+            initialize: function(options) {
+                this.model.on('change:forks', this.render);
+                this.model.on('change', this.filterRepos.bind(this));
+                this.totalItems = options.totalItems;
+                this.filterRepos(this.model);
+            },
+            filterRepos: function() {
+                var filters = this.model.toJSON();
+                this.collection.reset(
+                    this.totalItems.filter(function(repo) {
+                        return (filters.forks || !repo.get('fork')) &&
+                            (!filters.lang || repo.get('language') === filters.lang);
+                    })
+                );
+            }
+        });
+
+    $(function() {
+        function collectLanguages(repos) {
+            var result = [];
+            repos.forEach(function(repo) {
+                if(result.indexOf(repo.language) === -1) {
+                    result.push(repo.language);
+                }
+            });
+            return result;
+        }
+        var reposAll = new RepoCollection();
+        reposAll.fetch().then(function(response) {
+            var langs = collectLanguages(response),
+                app = new AppView({
+                    el: '.app',
+                    model: new Backbone.Model({
+                        langs: langs,
+                        forks: false,
+                        lang: ""
+                    }),
+                    totalItems: reposAll,
+                    collection: new RepoCollection(response)
+                }).render();
+        });
+    });
+</script>
+
+</body>
+</html>
+
+

@@ -1,0 +1,108 @@
+
+  .Basis-SyntaxHighlight
+  {
+    border: 1px solid #E0E0E0;
+    padding: 1px;
+    margin: 0 1ex;
+    overflow: hidden;
+
+    font-family: Consolas, monospace;
+    font-size: 100%;
+    line-height: 1.4em;
+    white-space: pre;   /* needs for line endings preserving */
+  }
+
+  .Basis-SyntaxHighlight .line
+  {
+    position: relative; /* for webkit, otherwise if user starts select from numbering
+                           selection begins from block begining */
+    zoom: 1;            /* IE6/7 */
+    /*white-space: pre;*/   /* preseving line endings in IE7 */
+
+    background: #F0F0F0;
+  }
+
+  .Basis-SyntaxHighlight .even
+  {
+    background-color: #F8F8F8;
+  }
+  /*.Basis-SyntaxHighlight .line:hover
+  {
+    background: #DDD;
+  }*/
+
+  .Basis-SyntaxHighlight .lineNumber
+  {
+    position: absolute;
+    left: 0;
+
+    padding: 0 .5ex;
+    margin: 0;
+    width: 6ex;
+    line-height: 1.4em;
+    height: 1.4em;
+
+    background: none;
+    border: none;
+    font-family: Consolas, monospace;
+    font-size: 100%;
+    text-align: right;
+    color: #666;
+
+      -moz-user-select: none;    /* prevent block including to selection */
+      -webkit-user-select: none;
+      -ms-user-select: none;
+    user-select: none;
+    pointer-events: none;        /* actually this rule makes unnecessary .over block,
+                                    but it lacks of browsers support */
+  }
+
+  .Basis-SyntaxHighlight .over
+  {
+    display: block;
+    position: absolute;
+    left: 0;
+    width: 7ex;
+    height: 1.4em;
+    z-index: 1;
+    background: url(data:image/png;base64,);  /* we need set transporent background, otherwise IE & Opera
+                                                 pass mouse event to underline blocks */
+  }
+
+  .Basis-SyntaxHighlight .lineContent
+  {
+    padding-left: 1ex;
+    padding-right: 1ex;
+    border-left: 2px solid #33BB66;
+    display: block;
+    white-space: pre-wrap;      /* preserve formating but allow word breaking */
+  }
+
+  .Basis-SyntaxHighlight .hasLineNumber .lineContent
+  {
+    margin-left: 7ex;
+    padding-left: 2.5ex;
+  }
+
+  .Basis-SyntaxHighlight .token-string
+  {
+    color: blue;
+  }
+  .Basis-SyntaxHighlight .token-comment 
+  {
+    color: #008200;
+  }
+  .Basis-SyntaxHighlight .token-keyword
+  {
+    color: #006699;
+    font-weight: bold;
+  }
+  .Basis-SyntaxHighlight .token-key
+  {
+    color: #006699;
+  }
+  .Basis-SyntaxHighlight .token-value
+  {
+    color: #AA8844;
+    font-weight: bold;
+  }

@@ -1,0 +1,15 @@
+
+  <b:resource src="TabSheetControl.css"/>
+  <b:resource src="TabControl.css"/>
+  <b:resource src="PageControl.css"/>
+  <b:define name="selected" type="bool"/>
+  <b:define name="disabled" type="bool"/>
+
+  <div class="Basis-TabSheetControl {selected} {disabled}">
+    <div{tabsElement} class="Basis-TabControl">
+      <div class="Basis-TabControl-Start"/>
+      <div{content|childNodesElement} class="Basis-TabControl-Content"/>
+      <div class="Basis-TabControl-End"/>
+    </div>
+    <div{pagesElement} class="Basis-PageControl"/>
+  </div>

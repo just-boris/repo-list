@@ -1,0 +1,429 @@
+﻿<!doctype html>
+
+<html>
+
+<head>
+  <meta http-equiv="Content-type" content="text/html; charset=utf-8" />
+
+  <title>Basis.js demos: Scroller</title>
+
+  <style type="text/css" id="demo-css">
+    HTML,
+    BODY
+    {
+      font-size: small;
+      font-family: Tahoma, Verdana, Arial, sans-serif;
+    }
+
+    .DemoBlock-Wrapper
+    {
+      margin-bottom: .5em;
+      width: 50%;
+      float: left;
+    }
+    .DemoBlock-Wrapper.short
+    {
+      width: 25%;
+    }
+
+    .DemoBlock
+    {
+      margin-right: 1ex;
+      background: white;
+      border: 1px solid #D0D0D0;
+      border-radius: 3px;
+      overflow: hidden;
+      position: relative;
+    }
+
+    .DemoBlock H2
+    {
+      font-size: 80%;
+      font-weight: normal;
+      background: #EEE;
+      margin: 0;
+      padding: 2px;
+      text-align: center;
+      border-bottom: 1px solid #D0D0D0;
+    }
+
+    #WorldMapPanel
+    {
+      height: 365px;
+      cursor: move;
+    }
+
+    #CountriesPanel
+    {
+      border-top: 1px solid #D0D0D0;
+      height: 34px;
+    }
+    #CountriesPanel .Country
+    {
+      display: inline-block;
+      padding: 7px;
+      color: #0066CC;
+    }
+    #CountriesPanel .Country:hover
+    {
+      color: #6699DD;
+      text-decoration: none;
+    }
+
+    #BallContainer
+    {
+      height: 431px;
+      position: relative;
+      overflow: hidden;
+    }
+
+    /* Hor Image Gallery*/
+    .HImageGallery
+    {
+      height: 250px;
+    }
+    
+    .HImageGallery .Basis-ScrollPanel-Content
+    {
+      height: 100%;
+      white-space: nowrap;
+    }
+
+    .HImageGallery .ImageItem
+    {
+      display: inline-block;
+      text-align: center;
+      width: 150px;
+      height: 100%;
+      *display: inline;
+      zoom: 1;
+    }
+
+    .HImageGallery .ImageItem IMG,
+    .VImageGallery .ImageItem IMG
+    {
+      padding: 10px;
+      vertical-align: middle;
+
+      border: 1px solid #C0C0C0;
+    }
+    .HImageGallery .aligner,
+    .VImageGallery .aligner
+    {
+      height: 100%;
+      display: inline-block;
+      vertical-align: middle;
+    }
+
+    .VImageGallery
+    {
+      height: 250px;
+    }
+
+    .VImageGallery .Basis-ScrollPanel-Content
+    {
+      width: 100%;
+    }
+
+    .VImageGallery .ImageItem
+    {
+      height: 100px;
+      text-align: center;
+    }
+
+    .ScrollList
+    {
+      height: 400px;
+      width: 100%;
+    }
+
+    .ScrollList .Basis-ScrollPanel-Content
+    {
+      width: 100%;
+    }
+
+    .ScrollList-Item
+    {
+
+      font-size: 140%;
+      padding: 1em;
+      border-bottom: 1px solid #EEE;
+    }
+
+
+    .Page-Slider
+    {
+      height: 400px !important;
+    }
+    .Page-Slider .Basis-Page
+    {
+      background: #DDD;
+    }
+    .Page-Slider .PageContent
+    {
+      margin-top: 125px;
+
+      text-align: center;
+      font-size: 430%;
+      color: white;
+      text-shadow: 1px 1px 3px rgba(0, 0, 0, 0.3);
+    }
+          
+  </style>
+  <!--[if lt IE 7]>
+  <style type="text/css">
+    BODY
+    {
+      font-size: x-small;
+    }
+  </style>
+  <![endif]-->
+
+  <script type="text/javascript" data-basis-config src="../../src/basis.js"></script>
+
+  <script type="text/javascript" src="../demo.js"></script>
+</head>
+
+<body>
+  <div id="demo-container"></div>
+
+  <script type="text/javascript" id="demo-javascript">
+    basis.require('basis.dom');
+    basis.require('basis.layout');
+    basis.require('basis.ui');
+    basis.require('basis.ui.scroller');
+    basis.require('basis.ui.pageslider');
+    
+    // import names
+    var DOM = basis.dom;
+
+    var Scroller = basis.ui.scroller.Scroller;
+    var ScrollPanel = basis.ui.scroller.ScrollPanel;
+    var ScrollGallery = basis.ui.scroller.ScrollGallery;
+    var PageSlider = basis.ui.pageslider.PageSlider;
+    var uiNode = basis.ui.Node;
+
+    var getter = basis.getter;
+
+    function createBlock(header, cssClassName){
+      var demoBlock = DOM.createElement('.DemoBlock', DOM.createElement('H2', header));
+      DOM.insert(DOM.get('demo-container'), DOM.createElement('.DemoBlock-Wrapper' + (cssClassName ? '.' + cssClassName : ''), demoBlock));
+      return demoBlock;
+    }
+
+
+    //
+    // World Map
+    //
+    var worldMapBlock = createBlock('World Map on ScrollPanel');
+
+    new uiNode({
+      container: worldMapBlock,
+
+      template:
+        '<div>' +
+          '<!--{worldMap}-->' +
+          '<div{childNodesElement} id="CountriesPanel"/>' +
+        '</div>',
+      binding: {
+        worldMap: new ScrollPanel({
+          template: '<b:include src="basis.ui.scroller.ScrollPanel" id="WorldMapPanel"/>',
+          content: DOM.createElement('img[src="../res/img/map.gif"][event-click="coord"][width="2550"][height="1285"]'),
+
+          scrollTo: function(x, y){
+            this.scroller.setPosition(Math.max(0, x - this.element.offsetWidth / 2), Math.max(0, y - this.element.offsetHeight / 2));
+          }
+        })
+      },
+
+      childClass: {
+        template:
+          '<a href="#" class="Country" event-click="scrollTo">{title}</a>',
+
+        binding: {
+          title: 'data:Title'
+        },
+
+        action: {
+          scrollTo: function(event){
+            this.parentNode.satellite.worldMap.scrollTo(this.data.PositionX, this.data.PositionY);
+            event.die();
+          }
+        }
+      },
+
+      childNodes: [
+        { data: { Title: 'Russia', PositionX: 1792, PositionY: 0 } },
+        { data: { Title: 'China', PositionX: 1900, PositionY: 358 } },
+        { data: { Title: 'Kazakhstan', PositionX: 1642, PositionY: 252 } },
+        { data: { Title: 'Ukraine', PositionX: 1412, PositionY: 242 } },
+        { data: { Title: 'USA', PositionX: 558, PositionY: 345 } },
+        { data: { Title: 'Canada', PositionX: 612, PositionY: 0 } }
+      ]
+    });
+
+    //
+    // Crazy Ball
+    //
+
+    /*var block = createBlock('Crazy Ball');
+    var ballContainer = DOM.insert(block, DOM.createElement('#BallContainer'));
+    var ball = DOM.insert(ballContainer, DOM.createElement('#Ball'));
+
+    new Scroller({
+      targetElement: ball,
+      handler: {
+        updatePosition: function(){
+          var x = -this.viewportX;
+          var y = -this.viewportY;
+
+          if (x + ball.offsetWidth > ballContainer.offsetWidth || x < 0)
+          {
+            var fixX = Math.max(0, Math.min(x, ballContainer.offsetWidth - ball.offsetWidth));
+            this.viewportTargetX = -fixX;
+            this.viewportX = -fixX;
+            this.currentVelocityX = -this.currentVelocityX;
+
+          }
+
+          if (y + ball.offsetHeight > ballContainer.offsetHeight || y < 0)
+          {
+            var fixY = Math.max(0, Math.min(y, ballContainer.offsetHeight - ball.offsetHeight));
+            this.viewportTargetY = -fixY;
+            this.viewportY = -fixY;
+            this.currentVelocityY = -this.currentVelocityY;
+          }
+        }
+      }
+    });*/
+
+    //
+    // Scroll List
+    //
+
+    new ScrollPanel({
+      scrollX: false,
+      template: '<b:include src="basis.ui.scroller.ScrollPanel" class="ScrollList"/>',
+      container: createBlock('Scroll List', 'short'),
+
+      childClass: {
+        template: 
+          '<div class="ScrollList-Item">{title}</div>',
+
+        binding: {
+          title: 'title'
+        }
+      },
+
+      childNodes: [
+        { title: 'List Item 1' },
+        { title: 'List Item 2' },
+        { title: 'List Item 3' },
+        { title: 'List Item 4' },
+        { title: 'List Item 5' },
+        { title: 'List Item 6' },
+        { title: 'List Item 7' },
+        { title: 'List Item 8' },
+        { title: 'List Item 9' },
+        { title: 'List Item 10'},
+        { title: 'List Item 11' },
+        { title: 'List Item 12' },
+        { title: 'List Item 13' },
+        { title: 'List Item 14' },
+        { title: 'List Item 15' }
+      ]
+    });
+
+    //
+    // Page Slider
+    //
+
+    new PageSlider({
+      template: '<b:include src="basis.ui.pageslider.PageSlider" class="Page-Slider"/>',
+      container: createBlock('Page Slider', 'short'),
+
+      childClass: {
+        template:
+          '<b:include src="basis.ui.tabs.Page">' +
+            '<b:append ref="content">' +
+              '<div class="PageContent">' +
+                '{text}' +
+              '</div>' +
+            '</b:append>' +
+          '</b:include>',
+        binding: {
+          text: 'text'
+        }
+      },
+      childNodes: [
+        { text: 'Page 1' },
+        { text: 'Page 2' },
+        { text: 'Page 3' }
+      ]
+    });
+
+    //
+    // Image Gallery
+    //
+
+    var ImageGallery = ScrollGallery.subclass({
+      childClass: {
+        template: 
+          '<div{content} class="ImageItem" event-click="select">' +
+            '<img{image} src="{src}"/>' +
+            '<span class="aligner"/>' +
+          '</div>',
+
+        binding: {
+          src: 'src'
+        }
+      },
+
+      childTransform: function(child, closeness){
+        basis.cssom.setStyle(child.tmpl.image, {
+          width: (60 + 70 * closeness) + 'px',
+          opacity: (.5 + .5 * closeness),
+          margin: -10 * closeness + 'px ' + -40 * closeness + 'px',
+          boxShadow: '0px 0px ' + (2 + 20 * closeness) + 'px rgba(0,0,0,' + (.1 + .25 * closeness).toFixed(2) + ')'
+        });
+      }
+    });
+
+    new ImageGallery({
+      scrollX: true,
+      container: createBlock('Horizontal Image Gallery', 'short'),
+      template: '<b:include src="basis.ui.scroller.ScrollPanel" class="ImageGallery HImageGallery"/>',
+
+      childNodes: [
+        { src: 'button.png' },
+        { src: 'calendar.png' },
+        { src: 'data_index.png' },
+        { src: 'dataset.png' },
+        { src: 'form.png' },
+        { src: 'paginator.png' },
+        { src: 'popup.png' },
+        { src: 'resizer.png' }
+      ]
+    });
+
+    new ImageGallery({
+      scrollY: true,
+      container: createBlock('Vertical Image Gallery', 'short'),
+      template: '<b:include src="basis.ui.scroller.ScrollPanel" class="ImageGallery VImageGallery"/>',
+
+      childNodes: [
+        { src: 'button.png' },
+        { src: 'calendar.png' },
+        { src: 'data_index.png' },
+        { src: 'dataset.png' },
+        { src: 'form.png' },
+        { src: 'paginator.png' },
+        { src: 'popup.png' },
+        { src: 'resizer.png' }
+      ]
+    });
+
+  </script>
+</body>
+
+</html>

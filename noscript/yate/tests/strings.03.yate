@@ -1,0 +1,10 @@
+/// {
+///     description: 'empty string in variable',
+///     result: ''
+/// }
+
+match / {
+    a = ""
+    a
+}
+

@@ -1,0 +1,74 @@
+﻿<!doctype html>
+
+<html>
+
+<head>
+  <meta http-equiv="Content-type" content="text/html; charset=utf-8" />
+
+  <title>Basis.js demos: Calendar</title>
+
+  <style type="text/css" id="demo-css">
+    BODY, HTML
+    {
+      font-size: small;
+      font-family: Tahoma, Verdana, Arial, sans-serif;
+    }
+
+    .Basis-Calendar
+    {
+      margin: 2ex;
+      float: left;
+    }
+  </style>
+
+  <!--[if lt IE 7]>
+  <style type="text/css">
+    BODY
+    {
+      font-size: x-small;
+    }
+  </style>
+  <![endif]-->
+  
+  <script type="text/javascript" data-basis-config src="../../src/basis.js"></script>
+
+  <script type="text/javascript" src="../demo.js"></script>
+</head>
+
+<body>
+  <div id="demo-container"></div>
+
+  <script type="text/javascript" id="demo-javascript">
+    basis.require('basis.l10n');
+    basis.require('basis.dom');
+    basis.require('basis.ui.button');
+    basis.require('basis.ui.calendar');
+
+    basis.l10n.setCultureList('en-US ru-RU uk-UA');
+
+    new basis.ui.button.ButtonPanel({
+      container: basis.dom.get('demo-container'),
+      childNodes: [null].concat(basis.l10n.getCultureList()).map(function(culture){
+        return {
+          caption: culture || 'Default (English)',
+          click: function(){
+            basis.l10n.setCulture(culture);
+          }
+        };
+      })
+    });
+
+    var calendar = new basis.ui.calendar.Calendar({
+      container: basis.dom.get('demo-container'),
+      sections: ['Month', 'Year', 'YearDecade']
+    });
+
+    var calendar2 = new basis.ui.calendar.Calendar({
+      container: basis.dom.get('demo-container'),
+      sections: ['Year', 'YearDecade']
+    });
+
+  </script>
+</body>
+
+</html>

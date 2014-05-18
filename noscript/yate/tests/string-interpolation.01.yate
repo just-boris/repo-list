@@ -1,0 +1,12 @@
+/// {
+///     description: 'string interpolation',
+///     data: {
+///         username: 'nop'
+///     },
+///     result: 'Hello, nop'
+/// }
+
+match / {
+    "Hello, { .username }"
+}
+

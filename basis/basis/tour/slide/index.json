@@ -1,0 +1,85 @@
+[
+  {
+    "id": "class_create",
+    "title": "Class: Simple class"
+  },
+  {
+    "id": "class_inheritance",
+    "title": "Class: Inheritance"
+  },
+  {
+    "id": "class_create_pattern",
+    "title": "Class: Instance create patterns"
+  },
+  {
+    "id": "class_ext",
+    "title": "Class: Extensions"
+  },
+  {
+    "id": "ui_node",
+    "title": "UI: Basics"
+  },
+  {
+    "id": "ui_simple",
+    "title": "UI: Do it simple"
+  },
+  {
+    "id": "ui_list",
+    "title": "UI: List"
+  },
+  {
+    "id": "ui_list_childClass",
+    "title": "UI: childClass"
+  },
+  {
+    "id": "ui_list_childFactory",
+    "title": "UI: childFactory"
+  },
+  {
+    "id": "ui_list_dataSource",
+    "title": "UI: dataSource"
+  },
+  {
+    "id": "ui_selection",
+    "title": "UI: Selection",
+    "files": [
+      "list.tmpl",
+      "list.css",
+      "item.tmpl",
+      "item.css"
+    ]
+  },
+  {
+    "id": "ui_selection_source",
+    "title": "UI: Selection as source",
+    "files": [
+      "list.tmpl",
+      "list.css",
+      "item.tmpl",
+      "item.css"
+    ]
+  },
+  {
+    "id": "ui_node_communication",
+    "title": "UI: Node communication",
+    "files": [
+      "list.tmpl",
+      "list.css",
+      "item.tmpl",
+      "item.css"
+    ]
+  },
+  {
+    "id": "ui_loose_coupling",
+    "title": "UI: Loose coupling",
+    "files": [
+      "editor.js",
+      "editor.tmpl",
+      "list.js",
+      "list.tmpl",
+      "list.css",
+      "item.tmpl",
+      "item.css"
+    ]
+  }
+]

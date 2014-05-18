@@ -1,0 +1,12 @@
+/// {
+///     description: 'simple absolute jpath',
+///     data: {
+///         username: 'nop'
+///     },
+///     result: 'nop'
+/// }
+
+match / {
+    /.username
+}
+

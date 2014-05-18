@@ -1,0 +1,358 @@
+﻿<!doctype html>
+
+<html>
+
+<head>
+  <meta http-equiv="Content-type" content="text/html; charset=utf-8" />
+
+  <title>Basis.js demos: Chart with range selection</title>
+
+  <style type="text/css" id="demo-css">
+    BODY, HTML
+    {
+      font-size: small;
+      font-family: Tahoma, Verdana, Arial, sans-serif;
+    }
+
+    .Basis-CheckGroup LABEL
+    {
+      display: block;
+      margin-bottom: 0.5em;
+    }
+    .Basis-CheckGroup LABEL INPUT
+    {
+      margin-left: 0;
+    }
+
+    #RangeChart
+    {
+      background: white;
+    }
+
+    .rangeOver
+    {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+    }
+    .rangeOver__before
+    {
+      background: rgba(0,0,0,.1);
+      float: left;
+      width: 0;
+      height: 100%;
+      position: relative;
+      overflow: hidden;
+    }
+    .rangeOver__before .trigger
+    {
+      position: absolute;
+      right: 0;
+      height: 100%;
+      width: 3px;
+      background: rgba(0,0,0,.1);
+      cursor: w-resize;
+    }
+    .rangeOver__before .trigger:hover
+    {
+      background: rgba(0,0,0,.2);
+    }
+    .rangeOver__after
+    {
+      background: rgba(0,0,0,.1);
+      float: right;
+      width: 0;
+      height: 100%;
+      position: relative;
+      overflow: hidden;
+    }
+    .rangeOver__after .trigger
+    {
+      position: absolute;
+      left: 0;
+      height: 100%;
+      width: 3px;
+      background: rgba(0,0,0,.1);
+      cursor: w-resize;
+    }
+    .rangeOver__after .trigger:hover
+    {
+      background: rgba(0,0,0,.2);
+    }
+    .rangeOver__window
+    {
+      height: 100%;
+      overflow: hidden;
+      position: relative;
+      cursor: move;
+      background-image: url(#); /* IE fix */
+    }
+
+
+    .Basis-Field-Title
+    {
+      font-weight: bold;
+      margin-bottom: 0.5em;
+    }
+
+  </style>
+
+  <script type="text/javascript" data-basis-config src="../../src/basis.js"></script>
+
+  <script type="text/javascript" src="../demo.js"></script>
+
+  <!--[if lt IE 9]>
+  <script type="text/javascript" src="../../src/basis/ext/flashcanvas.js"></script>
+  <![endif]-->
+
+
+</head>
+
+<body>
+  <div id="demo-container"></div>
+
+  <script type="text/javascript" id="demo-javascript">
+    basis.require('basis.dom');
+    basis.require('basis.entity');
+    basis.require('basis.data.value');
+    basis.require('basis.ui.chart');
+    basis.require('basis.dragdrop');
+    basis.require('basis.ui.calendar');
+
+    var DOM = basis.dom;
+    var nsEntity = basis.entity;
+    var LinearChart = basis.ui.chart.LinearChart;
+
+
+    //
+    // Example
+    //
+
+    var rawData = basis.resource('data.json').fetch();
+    var data = [];
+
+    var dates = rawData.dates.split(';');
+    var amounts = rawData.amounts.split(';');
+
+    var max = Math.max.apply(null, amounts.map(Number));
+
+    for (var i = dates.length; i-- > 0;)
+      data.push(new basis.data.Object({
+        data: {
+          Date: new Date(dates[i] * 1000),
+          Amount: Number(amounts[i])
+        }
+      }));
+
+    var chartValues = new basis.data.Dataset({
+      items: data
+    });
+
+    var reportSlice = new basis.data.dataset.Slice({
+      rule: basis.getter('data.Date', Number),
+      source: chartValues,
+      orderDesc: true,
+      offset: 450,
+      limit: 300
+    });
+
+    var chart = new LinearChart({
+      autoRotateScale: true,
+      container: DOM.get('demo-container'),
+      width: 800,
+      height: 450,
+      showLegend: false,
+      fillArea: true,
+
+      max: max,
+      style: {
+        lineWidth: 1.5
+      },
+      dataSource: reportSlice,
+      keyGetter: basis.getter('data.Date'),
+      keyTitleGetter: function(object){
+        var date = object.data.Date;
+        return date.getDate() + ' ' + basis.date.monthNumToAbbr[date.getMonth()].toLowerCase() + ' ' + date.getFullYear();
+      },
+      sorting: basis.getter('data.Date'),
+      series: [
+        {
+          color: 'red',
+          valueGetter: basis.getter('data.Amount')
+        }
+      ]
+    });
+
+    new LinearChart({
+      container: DOM.get('demo-container'),
+      template:
+        '<b:include src="basis.ui.chart.Chart" id="RangeChart">' +
+          '<b:append><!--{period}--></b:append>' +
+        '</b:include>',
+
+      binding: {
+        period: new basis.ui.Node({
+          template:
+            '<div class="rangeOver">' +
+              '<div{before} class="rangeOver__before" style="width: {beforeWidth}%"><div class="trigger"/></div>' +
+              '<div{after} class="rangeOver__after" style="width: {afterWidth}%"><div class="trigger"/></div>' +
+              '<div{win} class="rangeOver__window"/>' +
+            '</div>',
+          binding: {
+            beforeWidth: 'beforeWidth',
+            afterWidth: 'afterWidth'
+          },
+
+          beforeWidth: 0,
+          afterWidth: 0,
+          sync: function(){
+            var itemCount = reportSlice.index_.length;
+            var start = reportSlice.offset;
+            var end = start + reportSlice.limit;
+
+            if (reportSlice.orderDesc)
+            {
+              start = itemCount - end;
+              end = start + reportSlice.limit;
+            }
+
+            start = Math.max(0, start);
+            end = Math.max(0, end);
+
+            this.beforeWidth = 100 * (start / itemCount);
+            this.afterWidth = 100 * (1 - end / itemCount);
+
+            this.updateBind('beforeWidth');
+            this.updateBind('afterWidth');
+          },
+          templateSync: function(){
+            basis.ui.Node.prototype.templateSync.call(this);
+            this.dd1.setElement(this.tmpl.win);
+            this.dd2.setElement(this.tmpl.before.firstChild);
+            this.dd3.setElement(this.tmpl.after.firstChild);
+
+            this.sync();
+          },
+
+          init: function(){
+            basis.ui.Node.prototype.init.call(this);
+
+            reportSlice.addHandler({
+              rangeChanged: this.sync
+            }, this);
+
+            // add drag posibility for slider
+            this.dd1 = new basis.dragdrop.DragDropElement({
+              axisY: false,
+              handler: {
+                context: this,
+                callbacks: {
+                  start: function(){
+                    this.offset__ = reportSlice.offset;
+                  },
+                  drag: function(sender, config){
+                    var itemCount = reportSlice.index_.length;
+                    var offset = this.offset__ - parseInt(itemCount * config.deltaX / this.element.offsetWidth);
+                    reportSlice.setOffset(basis.number.fit(offset, 0, itemCount - reportSlice.limit));
+                  }
+                }
+              }
+            });
+
+            this.dd2 = new basis.dragdrop.DragDropElement({
+              axisY: false,
+              handler: {
+                context: this,
+                callbacks: {
+                  start: function(){
+                    this.limit__ = reportSlice.limit;
+                  },
+                  drag: function(sender, config){
+                    var itemCount = reportSlice.index_.length;
+                    var limit = this.limit__ - parseInt(itemCount * config.deltaX / this.element.offsetWidth);
+                    reportSlice.setLimit(Math.max(2, Math.min(limit, itemCount - reportSlice.offset)));
+                  }
+                }
+              }
+            });
+
+            this.dd3 = new basis.dragdrop.DragDropElement({
+              axisY: false,
+              handler: {
+                context: this,
+                callbacks: {
+                  start: function(){
+                    this.offset__ = reportSlice.offset;
+                    this.limit__ = reportSlice.limit;
+                  },
+                  drag: function(sender, config){
+                    var itemCount = reportSlice.index_.length;
+                    var offset = Math.min(reportSlice.offset + reportSlice.limit - 2, this.offset__ - parseInt(itemCount * config.deltaX / this.element.offsetWidth));
+                    var limit = reportSlice.limit - (offset - reportSlice.offset);
+                    reportSlice.setRange(offset, limit);
+                  }
+                }
+              }
+            });
+          }
+        })
+      },
+      
+      width: 800,
+      height: 50,
+      showLegend: false,
+      showYLabels: false,
+      showXLabels: false,
+      showBoundLines: false,
+      showGrid: false,
+      fillArea: true,
+      keyGetter: basis.getter('data.Date'),
+      dataSource: chartValues,
+      sorting: basis.getter('data.Date'),
+      series: [
+        basis.getter('data.Amount')
+      ],
+      style: {
+        lineWidth: .5
+      },
+      satellite: {
+        chartViewer: null
+      }
+    });
+
+    var totalCount = new basis.data.value.Property(chartValues.itemCount);
+    var rangeCount = new basis.data.value.Property(reportSlice.itemCount);
+
+    reportSlice.addHandler({
+      itemsChanged: function(dataset){
+        this.set(dataset.itemCount);
+      }
+    }, rangeCount);
+
+    chartValues.addHandler({
+      itemsChanged: function(dataset){
+        this.set(dataset.itemCount);
+      }
+    }, totalCount);
+
+    new basis.ui.Node({
+      container: document.getElementById('demo-container'),
+
+      template:
+        '<div>' +
+          '<div>Values total count: {totalCount}</div>' +
+          '<div>Values in range count: {rangeCount}</div>' +
+        '</div>',
+
+      binding: {
+        totalCount: basis.fn.$const(totalCount),
+        rangeCount: basis.fn.$const(rangeCount)
+      }
+    });
+
+  </script>
+</body>
+
+</html>

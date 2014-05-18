@@ -1,0 +1,231 @@
+﻿<!doctype html>
+
+<html>
+
+<head>
+  <meta http-equiv="Content-type" content="text/html; charset=utf-8" />
+
+  <title>Basis.js demos: Buttons</title>
+
+  <style type="text/css" id="demo-css">
+    HTML,
+    BODY
+    {
+      font-size: small;
+      font-family: Tahoma, Verdana, Arial, sans-serif;
+    }
+
+    .DemoBlock
+    {
+      background: white;
+      border: 1px solid #D0D0D0;
+      border-radius: 3px;
+      padding: 15px;
+      margin: 0 0 .5em 0;
+      overflow: hidden;
+      position: relative;
+    }
+    .DemoBlock H2
+    {
+      font-size: 80%;
+      font-weight: normal;
+      background: #EEE;
+      margin: -15px -15px 10px -15px;
+      padding: 2px;
+      text-align: center;
+    }
+
+    .imageLeft .Basis-Button-Caption
+    {
+      background: url(button_image.png) no-repeat left center;
+      padding-left: 20px;
+    }
+
+    .imageRight .Basis-Button-Caption
+    {
+      background: url(button_image.png) no-repeat right center;
+      padding-right: 20px;
+    }
+
+    .imageOnly .Basis-Button-Caption
+    {
+      background: url(button_image.png) no-repeat center center;
+      padding-left: 16px;
+      text-indent: -100ex;
+    }
+
+    .fixedWidthButton
+    {
+      width: 50%;
+    }
+
+    .big
+    {
+      font-size: 300% !important;
+    }
+
+  </style>
+  <!--[if lt IE 7]>
+  <style type="text/css">
+    BODY
+    {
+      font-size: x-small;
+    }
+  </style>
+  <![endif]-->
+
+  <script type="text/javascript" data-basis-config src="../../src/basis.js"></script>
+
+  <script type="text/javascript" src="../demo.js"></script>
+</head>
+
+<body>
+  <div id="demo-container"></div>
+
+  <script type="text/javascript" id="demo-javascript">
+    basis.require('basis.dom');
+    basis.require('basis.ui.button');
+    
+    // import names
+    var DOM = basis.dom;
+    var Button = basis.ui.button.Button;
+    var ButtonPanel = basis.ui.button.ButtonPanel;
+
+    function createBlock(header){
+      return DOM.insert(DOM.get('demo-container'), DOM.createElement('.DemoBlock', DOM.createElement('H2', header)));
+    }
+
+    function alertCaption(){
+      alert(this.caption);
+    }
+
+    var simpleButtonsBlock = createBlock('Simple Buttons');
+
+    new Button({
+      caption: 'Button1',
+      click: alertCaption,
+      container: simpleButtonsBlock
+    });
+
+    new Button({
+      caption: 'Button2',
+      click: alertCaption,
+      disabled: true,
+      container: simpleButtonsBlock
+    });
+
+    new ButtonPanel({
+      childNodes: [
+        {
+          caption: 'Button3',
+          click: alertCaption
+        },
+        {
+          caption: 'Button4',
+          click: alertCaption
+        },
+        {
+          caption: 'Button5',
+          click: alertCaption,
+          disabled: true
+        },
+        {
+          caption: 'disable/enable button5',
+          click: function(){
+            if (this.previousSibling.disabled)
+              this.previousSibling.enable();
+            else
+              this.previousSibling.disable();
+          }
+        }
+      ],
+      container: createBlock('Button Panel')
+    });
+
+    new ButtonPanel({
+      childNodes: [
+        {
+          caption: 'Button7',
+          click: alertCaption,
+          groupId: 1
+        },
+        {
+          caption: 'Button8',
+          click: alertCaption,
+          disabled: true,
+          groupId: 1
+        },
+        {
+          caption: 'Button9',
+          click: alertCaption,
+          groupId: 2
+        },
+        {
+          caption: 'Middle 9-10',
+          click: alertCaption,
+          groupId: 2
+        },
+        {
+          caption: 'Button10',
+          click: alertCaption,
+          groupId: 2
+        },
+        {
+          caption: 'Button11',
+          click: alertCaption,
+          disabled: true,
+          groupId: 3
+        }
+      ],
+      container: createBlock('Button Panel with Grouping')
+    });
+
+    new ButtonPanel({
+      childNodes: [
+        {
+          template: '<b:include src="basis.ui.button.Button" class="imageLeft"/>',
+          caption: 'Button12',
+          click: alertCaption
+        },
+        {
+          template: '<b:include src="basis.ui.button.Button" class="imageRight"/>',
+          caption: 'Button13',
+          click: alertCaption
+        },
+        {
+          template: '<b:include src="basis.ui.button.Button" class="imageOnly"/>',
+          caption: 'Button14',
+          click: alertCaption
+        },
+        {
+          caption: String.fromCharCode(8592),
+          click: alertCaption
+        }
+      ],
+      container: createBlock('Buttons with Image')
+    });
+
+    new ButtonPanel({
+      childNodes: [
+        {
+          template: '<b:include src="basis.ui.button.Button" class="big"/>',
+          caption: 'Button15',
+          click: alertCaption
+        }
+      ],
+      container: createBlock('Big Button')
+    });
+
+    var button16Container = createBlock('Button with 50% Width');
+    basis.dom.insert(button16Container, basis.dom.createElement('[style="width: 50%; font-size: 10px; text-align: center; margin-bottom: 3px;"]', basis.dom.createElement('[style="border: solid #666; border-width: 2px 1px 0; color: black;"]', '50%')));
+    new Button({
+      template: '<b:include src="basis.ui.button.Button" class="fixedWidthButton"/>',
+      caption: 'Button16',
+      click: alertCaption,
+      container: button16Container
+    });
+
+  </script>
+</body>
+
+</html>

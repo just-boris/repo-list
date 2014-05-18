@@ -1,0 +1,320 @@
+﻿<!doctype html>
+
+<html>
+
+<head>
+  <meta http-equiv="Content-type" content="text/html; charset=utf-8" />
+
+  <title>Basis.js demos: Data indexes</title>
+
+  <style type="text/css" id="demo-css">
+    HTML,
+    BODY
+    {
+      font-size: small;
+      font-family: Tahoma, Verdana, Arial, sans-serif;
+    }
+
+    .barWrapper
+    {
+      position: relative;
+      text-align: right;
+    }
+    .bar
+    {
+      position: absolute;
+      height: 100%;
+      background: rgba(128,200,128,.5);
+      right: 0;
+    }
+    .label
+    {
+      position: relative;
+    }
+
+    .diff
+    {
+      color: red;
+    }
+
+    .Basis-Table
+    {
+      margin-right: 2ex;
+      float: left;
+    }
+    .Basis-Table .right
+    {
+      text-align: right;
+    }
+    #RecordPanel
+    {
+      width: 250px;
+      float: left;
+      display: none;
+    }
+    #RecordPanel.hasDelegate
+    {
+      display: block;
+    }
+    .Basis-ButtonPanel
+    {
+      padding-bottom: .5em;
+    }
+  </style>
+  <!--[if lt IE 7]>
+  <style type="text/css">
+    BODY
+    {
+      font-size: x-small;
+    }
+  </style>
+  <![endif]-->
+
+  <script type="text/javascript" data-basis-config src="../../src/basis.js"></script>
+
+  <script type="text/javascript" src="../seedrandom.js"></script>
+  <script type="text/javascript" src="../demo.js"></script>
+</head>
+
+<body>
+  <div id="demo-container">
+  </div>
+
+  <script type="text/javascript" id="demo-javascript">
+
+    basis.require('basis.dom');
+    basis.require('basis.cssom');
+    basis.require('basis.data');
+    basis.require('basis.data.index');
+    basis.require('basis.ui.button');
+    basis.require('basis.ui.table');
+    basis.require('basis.ui.slider');
+
+    // import names
+    var DOM = basis.dom;
+    var nsData = basis.data;
+    var nsDataIndex = basis.data.index;
+    var cssom = basis.cssom;
+
+    var getter = basis.getter;
+    var ButtonPanel = basis.ui.button.ButtonPanel;
+    var Table = basis.ui.table.Table;
+    var Slider = basis.ui.slider.Slider;
+    var UINode = basis.ui.Node;
+
+    Math.seedrandom("basis");
+
+    var createDataItem = (function(){
+      var seed = 0;
+
+      return function(){
+        return basis.data.wrapObject({
+          id: ++seed,
+          title: 'item' + seed,
+          value: parseInt(50 * Math.random(), 10),
+          total: parseInt(150 * Math.random(), 10)
+        });
+      };
+    })();
+
+    var dataset = new basis.data.Dataset({
+      items: basis.array.create(15, createDataItem)
+    });
+
+    var indexMap = new nsDataIndex.IndexMap({
+      source: dataset,
+      calcs: {
+        percentOfValueMax: nsDataIndex.percentOfMax('data.value'),
+        percentOfTotalRange: nsDataIndex.percentOfRange('data.total'),
+        percentOfTotalSum: nsDataIndex.percentOfSum('data.total')
+      }
+    });
+
+    new ButtonPanel({
+      container: DOM.get('demo-container'),
+      childNodes: [
+        {
+          caption: 'add',
+          click: function(){
+            dataset.add(createDataItem());
+          }
+        },
+        {
+          caption: 'add 5',
+          click: function(){
+            dataset.add(basis.array.create(5, createDataItem));
+          }
+        },
+        {
+          caption: 'remove',
+          click: function(){
+            if (table.firstChild)
+              dataset.remove(table.firstChild.root);
+          }
+        },
+        {
+          caption: 'stress test #1 (1000 random updates)',
+          click: function(){
+            var items = dataset.getItems();
+            var t = new Date();
+            var i;
+
+            indexMap.lock();
+            for (i = 0; i < 1000; i++)
+            {
+              var item = items[parseInt(8461 * i) % items.length];
+              item.update({
+                value: parseInt(item.data.value + Math.random() * i) % 50,
+                total: parseInt(item.data.total + Math.random() * i) % 150
+              });
+            }
+            indexMap.unlock();
+
+            basis.dev.log('stress test time', new Date - t);
+          }
+        }
+      ]
+    });
+
+    var count = 0;
+    var table = new Table({
+      container: DOM.get('demo-container'),
+      dataSource: dataset,
+      structure: [
+        {
+          header: '#',
+          body: '{id}',
+          footer: {
+            value: new basis.data.value.Expression(
+              basis.data.index.min(dataset, 'data.value'),
+              basis.data.index.max(dataset, 'data.value'),
+              function(min, max) {
+                return 'min/max: ' + min + '/' + max;
+              }
+            )
+          }
+        },
+        {
+          sorting: 'data.title',
+          header: 'Title',
+          body: '{title}'
+        },
+        {
+          sorting: basis.getter('data.value', Number),
+          header: 'Value',
+          body: '<div class="barWrapper"><div class="bar" style="width: {percentOfValueMax}%"/><span class="label">{value}</span></div>',
+          footer: {
+            template: '<b:include src="basis.ui.table.FooterCell" class="right"/>',
+            value: basis.data.index.count(dataset)
+          }
+        },
+        {
+          sorting: basis.getter('data.total', Number),
+          header: 'Total',
+          body: '<div class="barWrapper"><div class="bar" style="width: {percentOfTotalRange}%"/><span class="label">{total}</span></div>',
+          footer: {
+            template: '<b:include src="basis.ui.table.FooterCell" class="right"/>',
+            value: basis.data.index.sum(dataset, 'data.total')
+          }
+        },
+        {
+          header: 'Total, %',
+          body: {
+            template: '<td class="right">{percentOfTotalSum}</td>'
+          },
+          footer: {
+            template: '<b:include src="basis.ui.table.FooterCell" class="right"/>',
+            value: basis.data.index.avg(indexMap, 'data.percentOfTotalSum').as(function(avg){
+              return (avg * 100).toFixed(2) + '%';
+            })
+          }
+        }
+      ],
+
+      childClass: {
+        percentOfTotalSum: 0,
+        percentOfTotalRange: 0,
+        percentOfValueMax: 0,
+
+        binding: {
+          id: 'data:',
+          title: 'data:',
+          value: 'data:',
+          total: 'data:',
+          percentOfTotalSum: 'percentOfTotalSum',
+          percentOfTotalRange: 'percentOfTotalRange',
+          percentOfValueMax: 'percentOfValueMax'
+        },
+        satellite: {
+          indexes: {
+            events: 'rootChanged',
+            delegate: function(owner){
+              return indexMap.getMember(owner.root);
+            },
+            instanceOf: nsData.Object.subclass({
+              active: true,
+              emit_update: function(delta){
+                nsData.Object.prototype.emit_update.call(this, delta);
+
+                this.owner.percentOfTotalSum = basis.string.format('{0:.2}%', 100 * this.data.percentOfTotalSum);
+                this.owner.updateBind('percentOfTotalSum');
+                this.owner.percentOfTotalRange = basis.string.format('{0:.2}%', 100 * this.data.percentOfTotalRange);
+                this.owner.updateBind('percentOfTotalRange');
+                this.owner.percentOfValueMax = basis.string.format('{0:.2}%', 100 * this.data.percentOfValueMax);
+                this.owner.updateBind('percentOfValueMax');
+              }
+            })
+          }
+        }
+      },
+      selection: {
+        handler: {
+          itemsChanged: function(){
+            recordPanel.setDelegate(this.pick());
+          }
+        }
+      }
+    });
+
+    var recordPanel = new UINode({
+      container: DOM.get('demo-container'),
+      template: '<div id="RecordPanel" class="{hasDelegate}"/>',
+      binding: {
+        hasDelegate: {
+          events: 'delegateChanged',
+          getter: 'delegate'
+        }
+      },
+      childClass: Slider.subclass({
+        autoDelegate: true,
+        marks: 10,
+        handler: {
+          update: function(){
+            if (this.propName in this.data)
+              this.setValue(this.data[this.propName]);
+          },
+          change: function(){
+            var data = {};
+            data[this.propName] = this.value;
+            this.update(data);
+          }
+        }        
+      }),
+      childNodes: [
+        {
+          propName: 'value',
+          max: 50
+        },
+        {
+          propName: 'total',
+          max: 150
+        }
+      ]
+    });
+
+
+    
+  </script>
+</body>
+
+</html>

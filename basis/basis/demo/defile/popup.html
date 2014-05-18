@@ -1,0 +1,190 @@
+<!doctype html>
+
+<html>
+
+<head>
+  <meta http-equiv="Content-type" content="text/html; charset=utf-8" />
+
+  <title>Basis.js demos: Popups</title>
+
+  <style type="text/css" id="demo-css">
+    HTML,
+    BODY
+    {
+      font-size: small;
+      font-family: Tahoma, Verdana, Arial, sans-serif;
+    }
+
+    .DemoBlock
+    {
+      background: white;
+      border: 1px solid #D0D0D0;
+      border-radius: 3px;
+      padding: 15px;
+      margin: 0 0 .5em 0;
+      overflow: hidden;
+      position: relative;
+    }
+    .DemoBlock H2
+    {
+      font-size: 80%;
+      font-weight: normal;
+      background: #EEE;
+      margin: -15px -15px 10px -15px;
+      padding: 2px;
+      text-align: center;
+    }
+
+    .Basis-Balloon-Content,
+    .Basis-Popup-Content
+    {
+      max-width: 300px;
+    }
+
+    BODY .visible
+    {
+        -webkit-transition: opacity .5s, margin-left .5s;
+        -moz-transition: opacity .5s, margin-left .5s;
+        -ms-transition: opacity .5s, margin-left .5s;
+        -o-transition: opacity .5s, margin-left .5s;
+      transition: opacity .5s, margin-left .5s;
+    }
+    BODY .visible-anim
+    {
+      margin-left: -50px;
+      opacity: 0;
+        -webkit-transition: none;
+        -moz-transition: none;
+        -ms-transition: none;
+        -o-transition: none;
+      transition: none;
+    }
+  </style>
+  <!--[if lt IE 7]>
+  <style type="text/css">
+    BODY
+    {
+      font-size: x-small;
+    }
+  </style>
+  <![endif]-->
+
+  <script type="text/javascript" data-basis-config src="../../src/basis.js"></script>
+
+  <script type="text/javascript" src="../demo.js"></script>
+</head>
+
+<body>
+  <div id="demo-container"></div>
+
+  <script type="text/javascript" id="demo-javascript">
+    basis.require('basis.dom');
+    basis.require('basis.ui.popup');
+    basis.require('basis.ui.menu');
+    basis.require('basis.ui.button');
+    
+    // import names
+    var getter = basis.getter;
+
+    var DOM = basis.dom;
+    var Popup = basis.ui.popup.Popup;
+    var Balloon = basis.ui.popup.Balloon;
+    var Menu = basis.ui.menu.Menu;
+    var Button = basis.ui.button.Button;
+
+    function createBlock(header){
+      return DOM.insert(DOM.get('demo-container'), DOM.createElement('.DemoBlock', DOM.createElement('H2', header)));
+    }
+
+    // Popup
+
+    var popup = new Popup({
+      dir: 'left bottom left top',
+      autorotate: true,
+      content: 'Lorem ipsum dolor sit amet, discere admodum scribentur no qui. \
+        Ius reque idque dolore ad, appetere perfecto nec ad. Inimicus patrioque hendrerit est cu, his no accumsan nominavi, dico ipsum adipiscing cum eu. \
+        Nec ex meis noluisse percipitur, vix omnes noluisse posidonium ut. \
+        Duo et deseruisse honestatis, nemore aliquip ad pri. Cum quem porro delicata te.'
+    });
+
+    new Button({
+      container: createBlock('Popup'),
+
+      caption: 'Show Popup',
+      click: function(){
+        popup.show(this.element);
+      }
+    });
+
+    // Ballon
+
+    var balloon = new Balloon({
+      dir: 'center bottom left top',
+      autorotate: true,
+      content: 'Lorem ipsum dolor sit amet, discere admodum scribentur no qui. \
+        Ius reque idque dolore ad, appetere perfecto nec ad. Inimicus patrioque hendrerit est cu, his no accumsan nominavi, dico ipsum adipiscing cum eu. \
+        Nec ex meis noluisse percipitur, vix omnes noluisse posidonium ut.\
+        Duo et deseruisse honestatis, nemore aliquip ad pri. Cum quem porro delicata te.'
+    });
+
+    new Button({
+      container: createBlock('Balloon'),
+
+      caption: 'Show Balloon',
+      click: function(){
+        balloon.show(this.element);
+      }
+    });
+
+    // Menu
+
+    function alertTitleAndHideMenu(){
+      alert(this.caption);
+      this.parentNode.hide();
+    }
+
+    var menu = new Menu({
+      childNodes: [
+        {
+          caption: 'Menu Item 1',
+          click: alertTitleAndHideMenu,
+          groupId: 1
+        },
+        {
+          caption: 'Menu Item 2',
+          click: alertTitleAndHideMenu,
+          disabled: true,
+          groupId: 1
+        },
+        {
+          caption: 'Menu Item 3',
+          click: alertTitleAndHideMenu,
+          groupId: 2
+        },
+        {
+          caption: 'Menu Item 4',
+          click: alertTitleAndHideMenu,
+          groupId: 2
+        },
+        {
+          caption: 'Menu Item 5',
+          click: alertTitleAndHideMenu,
+          groupId: 3
+        }
+      ]
+    });
+
+    new Button({
+      container: createBlock('Menu'),
+
+      caption: 'Show Menu',
+      click: function(){
+        menu.show(this.element);
+      }
+    });
+
+
+  </script>
+</body>
+
+</html>

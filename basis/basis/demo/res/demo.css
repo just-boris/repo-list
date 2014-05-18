@@ -1,0 +1,48 @@
+ 
+  HTML
+  {
+    font-size: small;
+    font-family: Tahoma, Verdana, Arial, sans-serif;
+    height: 100%;
+    margin: 0;
+    padding: 0;
+
+    background: #FAF8EC;
+    color: black;
+  }
+  BODY
+  {
+    padding: 0;
+    margin: 20px;
+  }
+
+  H1
+  {
+    clear: left;
+    margin: 0;
+    padding-bottom: .25em;
+    font-family: Arial, sans-serif;
+    font-size: 210%;
+    font-weight: normal;
+  }
+
+  #BackButton
+  {
+    display: block;
+    float: left;
+    color: black;
+    background: #d9d09e;
+    text-decoration: none;
+    padding: .5em 2ex;
+  }
+
+  #DemoWrapper
+  {
+    padding: 2em 0;
+    clear: both;
+  }
+
+  #demo-container
+  {
+    overflow: hidden;
+  }

@@ -1,0 +1,7 @@
+/// {
+///     description: 'include with relative paths',
+///     result: 'Hello, nop'
+/// }
+
+include "includes/common.yate"
+

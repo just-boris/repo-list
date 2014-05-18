@@ -1,0 +1,47 @@
+{
+    "author": {
+        "name": "Sergey Nikitin",
+        "email": "nik.pasaran@gmail.com",
+        "url": "https://github.com/pasaran"
+    },
+    "name": "noscript",
+    "description": "JavaScript MVC framework",
+    "version": "0.1.11",
+    "homepage": "https://github.com/yandex-ui/noscript",
+    "repository": {
+        "type": "git",
+        "url": "git://github.com/yandex-ui/noscript.git"
+    },
+    "dependencies": {
+        "nommon": "0.0.23"
+    },
+    "devDependencies": {
+        "borschik": "0.4.x",
+        "es5-shim": "2.1.0",
+        "expect.js": "*",
+        "grunt": "0.4.2",
+        "grunt-cli": "0.1.11",
+        "grunt-contrib-jshint": "*",
+        "grunt-mocha": "0.4.7",
+        "jscs": "1.0.11",
+        "sinon": "1.7.3",
+        "yate": "*"
+    },
+    "optionalDependencies": {},
+    "engines": {
+        "node": "*"
+    },
+    "files": [
+        "css",
+        "dist",
+        "src",
+        "yate",
+
+        "noscript.borschik.js"
+    ],
+    "scripts": {
+        "prepublish": "make yate && mkdir -p dist && borschik -i noscript.borschik.js -o dist/noscript.js -m no && borschik -i noscript.borschik.js -o dist/noscript.min.js -m yes",
+        "test": "grunt && jscs ."
+    }
+}
+

@@ -1,0 +1,26 @@
+/// {
+///     description: '* selector',
+///     data: {
+///         blocks: {
+///             app: {
+///                 content: {
+///                     user: {
+///                         left: 'profile',
+///                         right: 'photo'
+///                     }
+///                 }
+///             }
+///         }
+///     },
+///     result: 'blocksappcontentuserleftright'
+/// }
+
+match / {
+    apply .blocks walk
+}
+
+match .* walk {
+    name()
+    apply .* walk
+}
+

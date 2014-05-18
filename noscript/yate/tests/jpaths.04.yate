@@ -1,0 +1,22 @@
+/// {
+///     description: '. expression',
+///     data: {
+///         items: {
+///             item: [
+///                 { title: 'First' },
+///                 { title: 'Second' },
+///                 { title: 'Third' }
+///             ]
+///         }
+///     },
+///     result: 'FirstSecondThird'
+/// }
+
+match / {
+    apply .items.item.title
+}
+
+match .title {
+    .
+}
+

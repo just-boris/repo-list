@@ -1,0 +1,158 @@
+﻿<!doctype html>
+
+<html>
+
+<head>
+  <meta http-equiv="Content-type" content="text/html; charset=utf-8" />
+
+  <title>Basis.js demos: Resizer</title>
+
+  <style type="text/css" id="demo-css">
+    HTML,
+    BODY
+    {
+      font-size: small;
+      font-family: Tahoma, Verdana, Arial, sans-serif;
+    }
+
+    #demo-container
+    {
+      width: 100%;
+      box-sizing: border-box;
+      height: 500px;
+      background: white;
+      border: 1px solid #E0E0E0;
+      padding: 5px;
+      margin-top: 20px;
+    }
+
+    #HorPanel
+    {
+      position: relative;
+      width: 20%;
+      min-width: 200px;
+      max-width: 50%;
+      border-right: 1px solid black;
+      height: 100%;
+      float: left;
+      padding-left: 2ex;
+      background: #F0F0F0;
+    }
+    #HorPanel.right
+    {
+      float: right;
+      border-left: 1px solid black;
+      border-right: none;
+    }
+    #HorPanel .Basis-Resizer
+    {
+      top: 0;
+      bottom: 0;
+      right: -3px;
+      width: 5px;
+    }
+    #HorPanel.right .Basis-Resizer
+    {
+      left: -3px;
+      right: auto;
+    }
+
+    #VertPanel
+    {
+      position: absolute;
+      top: 0;
+      height: 35%;
+      min-height: 25%;
+      max-height: 70%;
+      left: 0;
+      right: 0;
+      padding-left: 2ex;
+      background: #F0F0F0;
+      border-bottom: 1px solid black;
+    }
+    #VertPanel .Basis-Resizer
+    {
+      bottom: -3px;
+      height: 5px;
+      left: 0;
+      right: 0;
+    }
+    #VertPanel.bottom
+    {
+      top: auto;
+      bottom: 0;
+      border-top: 1px solid black;
+      border-bottom: none;
+    }
+    #VertPanel.bottom .Basis-Resizer
+    {
+      bottom: auto;
+      top: -3px;
+    }
+  </style>
+  <!--[if lt IE 7]>
+  <style type="text/css">
+    BODY
+    {
+      font-size: x-small;
+    }
+  </style>
+  <![endif]-->
+
+  <script type="text/javascript" data-basis-config src="../../src/basis.js"></script>
+
+  <script type="text/javascript" src="../demo.js"></script>
+</head>
+
+<body>
+  <div id="demo-container"></div>
+
+  <script type="text/javascript" id="demo-javascript">
+    basis.require('basis.dom');
+    basis.require('basis.cssom');
+    basis.require('basis.ui.resizer');
+
+    var DOM = basis.dom;
+    var classList = basis.cssom.classList;
+    var Resizer = basis.ui.resizer.Resizer;
+
+    var horPanel = DOM.createElement('#HorPanel',
+      DOM.createElement('H2', 'Vertical panel'),
+      DOM.createElement('P', 'Default width = 20%, min width = 200px, max width = 50%'),
+      DOM.createElement({
+        description: 'BUTTON',
+        click: function(){
+          classList(this.parentNode).toggle('right');
+        }
+      }, 'change side')
+    );
+    var vertPanel = DOM.createElement('#VertPanel',
+      DOM.createElement('H2', 'Horizontal panel'),
+      DOM.createElement('P', 'Default height = 35%, min height = 25%, max height = 70%'),
+      DOM.createElement({
+        description: 'BUTTON',
+        click: function(){
+          classList(this.parentNode).toggle('bottom');
+        }
+      }, 'change side')
+    );
+
+    new Resizer({
+      element: horPanel
+    });
+    new Resizer({
+      element: vertPanel,
+      property: 'height'
+    });
+
+    DOM.insert(DOM.get('demo-container'), [
+      horPanel,
+      DOM.createElement('[style="height: 100%; position: relative; overflow: hidden;"]',
+        vertPanel
+      )
+    ]);
+
+  </script>
+</body>
+
+</html>

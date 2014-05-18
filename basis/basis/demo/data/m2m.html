@@ -1,0 +1,577 @@
+﻿<!doctype html>
+
+<html>
+
+<head>
+  <meta http-equiv="Content-type" content="text/html; charset=utf-8" />
+
+  <title>Basis.js demos: M:M relationship editor</title>
+
+  <style type="text/css" id="demo-css">
+    HTML
+    {
+      padding: 0;
+      margin: 0;
+      font-family: Tahoma, Verdana, sanf-serif;
+      font-size: small;
+    }
+    BODY
+    {
+      padding: 0 10px;
+      margin: 0;
+    }
+
+    .Basis-Tree
+    {
+      background: white;
+      border: 1px solid #AAA;
+      width: 380px;
+      height: 600px;
+      overflow: auto;
+      overflow-y: scroll;
+      overflow-x: hidden;
+    }
+
+    .ListContainer
+    {
+      float: left;
+      margin-right: 10px;
+    }
+    .ListContainer .debug
+    {
+      height: 2em;
+    }
+
+    .Basis-ButtonPanel
+    {
+      padding-bottom: 4px;
+    }
+    #relatedTreeContainer .Basis-ButtonPanel
+    {
+      float: right;
+    }
+
+    .form-content
+    {
+      overflow: hidden;
+    }
+
+    #MasterTree,
+    #RelatedTree
+    {
+        -webkit-user-select: none;
+        -moz-user-select: none;
+      user-select: none;
+    }
+    #MasterTree .Basis-TreeNode
+    {
+      border-bottom: 1px solid #E0E0E0;
+      cursor: pointer;
+    }
+    #MasterTree .emptyLabel
+    {
+      color: #AAA;
+      font-style: italic;
+      padding: .15em 0 .2em;
+    }
+    #MasterTree .hasChildren .emptyLabel
+    {
+      display: none;
+    }
+    #MasterTree .Basis-TreeNode .Basis-TreeNode-Caption:hover
+    {
+      background-color: inherit;
+    }
+    #MasterTree .Basis-TreeNode:hover
+    {
+      background-color: #EEF8FF;
+    }
+    #MasterTree .Basis-TreeNode-Content
+    {
+      padding: 2px 0 2px 16px;
+      overflow: hidden;
+    }
+    #MasterTree .Field-WordLink
+    {
+      margin: 4px 0 4px 2px;
+      display: inline-block;
+      font-size: 85%;
+      line-height: 1em;
+    }
+    #MasterTree .Field-WordLink:hover *
+    {
+      border-color: #888;
+    }
+    #MasterTree .Field-WordLink-Title
+    {
+      padding: .1em .75ex;
+      background: #E8E8E8;
+      background: #E8E8E8 padding-box -webkit-linear-gradient(top, rgba(255,255,255,0.25) 0, rgba(255,255,255,0.5) 10%, rgba(255,255,255,0.2) 25%, rgba(255,255,255,0) 60%);
+      background: #E8E8E8 -moz-linear-gradient(top, rgba(255,255,255,0.25) 0, rgba(255,255,255,0.5) 10%, rgba(255,255,255,0.2) 25%, rgba(255,255,255,0) 60%);
+      border: 1px solid silver;
+      border-right: none;
+        -moz-border-radius: 3px 0 0 3px;
+        -webkit-border-radius: 3px 0 0 3px;
+      border-radius: 3px 0 0 3px;
+    }
+    #MasterTree .Field-WordLink-DeleteButton
+    {
+      color: #888;
+      padding: .1em .75ex;
+      background: #E8E8E8;
+      background: #E8E8E8 padding-box -webkit-linear-gradient(top, rgba(255,255,255,0.25) 0, rgba(255,255,255,0.5) 10%, rgba(255,255,255,0.2) 25%, rgba(255,255,255,0) 60%);
+      background: #E8E8E8 -moz-linear-gradient(top, rgba(255,255,255,0.25) 0, rgba(255,255,255,0.5) 10%, rgba(255,255,255,0.2) 25%, rgba(255,255,255,0) 60%);
+      border: 1px solid silver;
+        -moz-border-radius: 0 3px 3px 0;
+        -webkit-border-radius: 0 3px 3px 0;
+      border-radius: 0 3px 3px 0;
+    }
+    #MasterTree .Field-WordLink-DeleteButton:hover
+    { 
+      background-color: red;
+      border-color: maroon;
+      color: maroon;
+    }
+
+    #MasterTree .count
+    {
+      margin-left: 1ex;
+      color: #AAA;
+    }
+    #MasterTree .selected
+    {
+      background: #D9E8FB !important;
+    }
+
+    #RelatedTree .Basis-Tree-NodeGroup-Content
+    {
+      display: none;
+    }
+    #RelatedTree LI
+    {
+      cursor: pointer;
+      background: white;
+      padding: 2px 4px;
+      color: #888;
+      margin: 1px;
+      border-radius: 3px;
+    }
+    #RelatedTree LI.checked
+    {
+      background: #F0F0AA !important;
+      color: black;
+    }
+    #RelatedTree LI:hover
+    {
+      background: #E0E0E8;
+    }
+    #RelatedTree .freq
+    { 
+      color: #AAA;
+      font-size: 85%;
+    }
+    #RelatedTree INPUT
+    {
+      margin: 0 5px 0 0;
+      padding: 0;
+      position: relative;
+      top: 2px;
+    }
+    #RelatedTree .match
+    {
+      background: gold;
+      border-radius: 3px;
+    }
+  </style>
+  <!--[if lt IE 7]>
+  <style type="text/css">
+    BODY
+    {
+      font-size: x-small;
+    }
+  </style>
+  <![endif]-->
+
+  <script type="text/javascript" data-basis-config src="../../src/basis.js"></script>
+
+  <script type="text/javascript" src="../demo.js"></script>
+</head>
+
+<body>
+  <div id="demo-container"></div>
+
+  <script id="demo-javascript" type="text/javascript">
+    basis.require('basis.dom');
+    basis.require('basis.dom.event');
+    basis.require('basis.cssom');
+    basis.require('basis.entity');
+    basis.require('basis.ui');
+    basis.require('basis.ui.tree');
+    basis.require('basis.ui.button');
+    basis.require('basis.ui.field');
+
+    var Class = basis.Class;
+    var DOM = basis.dom;
+    var Event = basis.dom.event;
+
+    var nsEntity = basis.entity;
+    var nsUI = basis.ui;
+    var nsTree = basis.ui.tree;
+    var nsButton = basis.ui.button;
+
+    var cssom = basis.cssom;
+    var classList = basis.cssom.classList;
+    
+    // Определяем типы данных
+    var Field = new nsEntity.EntityType({
+      name: 'Field',
+      fields: {
+        FieldId: nsEntity.IntId,
+        Title: String
+      }
+    });
+
+    var Word = new nsEntity.EntityType({
+      name: 'Word',
+      fields: {
+        WordId: nsEntity.IntId,
+        Title: String,
+        Freq: Number
+      }
+    });
+
+    var Link = new nsEntity.EntityType({
+      name: 'Link',
+      fields: {
+        FieldId: nsEntity.NumberId,
+        WordId: nsEntity.NumberId
+      }
+    });
+
+    var linkByField = new basis.data.dataset.Split({
+      source: Link.all,
+      rule: 'data.FieldId'
+    });
+
+    var words = 'Lorem ipsum dolor sit amet, consectetuer adipiscing elit. Sed metus nibh, sodales a, porta at, vulputate eget, dui. Pellentesque ut nisl. Maecenas tortor turpis, interdum non, sodales non, iaculis ac, lacus. Lorem ipsum dolor sit amet, consectetuer adipiscing elit. Sed metus nibh, sodales a, porta at, vulputate eget, dui. Pellentesque ut nisl. Maecenas tortor turpis, interdum non, sodales non, iaculis ac, lacus.'.toLowerCase().split(/[^a-z]+/);
+
+    // Генерируем тестовый набор данных.
+    for (var i = 0; i < 10; i++)
+    {
+      Field({
+        FieldId: i,
+        Title: 'Field #' + i
+      });
+
+      Word({
+        WordId: i,
+        Title: words[i],
+        Freq: (i * 123) % 5
+      });
+    }
+
+    for (var i = 0; i < 25; i++)
+    {
+      var fieldId = parseInt((i * 2347.56) % Field.all.itemCount, 10);
+      var wordId = parseInt((i * 7263.23) % Word.all.itemCount, 10);
+      Link({
+        FieldId: fieldId,
+        WordId: wordId
+      });
+    }
+
+    //
+    // Интерфейс
+    //
+
+    // Главное дерево - список полей
+    var masterTree = new nsTree.Tree({
+      template: '<b:include src="basis.ui.tree.Tree" id="MasterTree">',
+
+      dataSource: Field.all,
+
+      // Определяем сортировку для дочерних узлов: сортируем по node.data.title.
+      sorting: basis.getter('data.Title'),
+
+      // Определяем класс для дочерних узлов
+      childClass: nsTree.Folder.subclass({
+        template: 
+          '<b:resource src="../../src/basis/ui/templates/tree/Node.css"/>' +
+          '<b:resource src="../../src/basis/ui/templates/tree/Folder.css"/>' +
+          '<b:resource src="../../src/basis/ui/templates/tree/Node_Expander.css"/>' +
+          '<li class="Basis-TreeNode {hasChildren} {selected}" event-click="select">' +
+            '<div{content} class="Basis-TreeNode-Title Basis-TreeNode-CanHaveChildren">' +
+              '<div class="Basis-TreeNode_Expander Basis-TreeNode_Expander__{collapsed}" event-click="toggle"/>' +
+              '<span class="Basis-TreeNode-Caption">{title}<span class="count">(Word count: {childCount}, Frequency: {freqSum})</span></span>' +
+            '</div>' + 
+            '<div{childNodesElement} class="Basis-TreeNode-Content Basis-TreeNode-Content__{collapsed}">' + 
+              '<span class="emptyLabel">No words</span>' +
+            '</div>' +
+          '</li>',
+
+        freqSum: 0,
+        binding: {
+          title: 'data:Title',
+          freqSum: 'freqSum'
+        },
+        sorting: function(node){
+          return Word.get(node.data.WordId).data.Title;
+        },
+        handler: {
+          childNodesModified: function(node, delta){
+            // calculate frequency delta sum
+            var deltaSum = 0;
+            var array;
+
+            if (array = delta.inserted)
+              for (var i = 0; i < array.length; i++)
+                deltaSum += Word.get(array[i].data.WordId).data.Freq;
+
+            if (array = delta.deleted)
+              for (var i = 0; i < array.length; i++)
+                deltaSum -= Word.get(array[i].data.WordId).data.Freq;
+
+            if (deltaSum)
+            {
+              this.freqSum += deltaSum;
+              this.updateBind('freqSum');
+            }
+          }
+        },
+        init: function(){
+          nsTree.Folder.prototype.init.call(this);
+          this.setDataSource(linkByField.getSubset(this.data.FieldId, true));
+        },
+
+        childFactory: basis.ui.Node.prototype.childFactory,
+        childClass: nsUI.Node.subclass({
+          template: 
+            '<div class="Field-WordLink">' +
+              '<!--{word}-->' +
+              '<span class="Field-WordLink-DeleteButton" event-click="delete">x</span>' +
+            '</div>',
+
+          binding: {
+            word: 'satellite:'
+          },
+
+          action: {
+            delete: function(){
+              this.target.destroy();
+            }
+          },
+
+          satellite: {
+            word: {
+              delegate: basis.getter('data.WordId', Word),
+              instanceOf: nsUI.Node.subclass({
+                template:
+                  '<span class="Field-WordLink-Title">{title}</span>',
+
+                binding: {
+                  title: 'data:Title'
+                }
+              })
+            }
+          }
+        })
+      }),
+
+      // Задаем обработчик на событие изменения выборки (Selection).
+      selection: {
+        handler: {
+          itemsChanged: function(){
+            relatedTree.setDelegate(this.pick());
+          }
+        }
+      }
+    });
+
+    var masterButtonPanel = new basis.ui.button.ButtonPanel({
+      childNodes: [
+        {
+          caption: 'Expand all',
+          groupId: 1,
+          click: function(){
+            masterTree.expandAll();
+          }
+        },
+        {
+          caption: 'Collapse all',
+          groupId: 1,
+          click: function(){
+            masterTree.collapseAll();
+          }
+        },
+        {
+          name: 'add',
+          caption: 'Add field',
+          click: function(){
+            var newId = parseInt(Math.random() * 1000000 + 10, 10);
+            Field({
+              FieldId: newId,
+              Title: 'Field #' + newId
+            });
+          }
+        }
+      ]
+    });
+
+    // Зависимый список - список слов
+    var relatedTree = new nsTree.Tree({
+      template: '<b:include src="basis.ui.tree.Tree" id="RelatedTree">',
+
+      emit_targetChanged: function(delta){
+        nsTree.Tree.prototype.emit_targetChanged.call(this, delta);
+
+        cssom.visibility(this.element.parentNode, !!this.target);
+
+        if (this.target)
+        {
+          var fieldId = this.data.FieldId;
+          this.dataSource.setMap(function(object){
+            return Link.getSlot({
+              FieldId: fieldId,
+              WordId: object.data.WordId
+            });
+          });
+        }
+      },
+
+      // Определяем сортировку для дочерних узлов: сортируем по node.data.title.
+      sorting: function(node){
+        return node.satellite.word.data.Title;
+      },
+      dataSource: new basis.data.dataset.MapFilter({
+        source: Word.all
+      }),
+      childClass: nsUI.Node.subclass({
+        template: 
+          '<li class="{checked}" event-click="toggle">' +
+            '<input type="checkbox" checked="{checked}"/>' +
+            '<!--{word}-->' +
+          '</li>',
+
+        binding: {
+          word: 'satellite:',
+          checked: {
+            events: 'targetChanged',
+            getter: function(node){
+              return node.target ? 'checked' : '';
+            }
+          }
+        },
+
+        action: {
+          toggle: function(){
+            if (this.target)
+              this.target.destroy();
+            else
+              Link(this.data);
+          }
+        },
+        satellite: {
+          word: {
+            delegate: basis.getter('data.WordId', Word),
+            instanceOf: nsUI.Node.subclass({
+              template:
+                '<span>' +
+                   '{title} ' +
+                   '<span class="freq">(frequency: {freq})</span>' +
+                '</span>',
+
+              binding: {
+                title: 'data:Title',
+                freq: 'data:Freq'
+              }
+            })
+          }
+        }
+      })
+    });
+
+    var relatedButtonPanel = new basis.ui.button.ButtonPanel({
+      childNodes: [
+        {
+          caption: 'Check all',
+          groupId: 1,
+          click: function(){
+            relatedTree.dataSource.getItems().forEach(function(item){
+              if (!item.target)
+                Link(item.data);
+            });
+          }
+        },
+        {
+          caption: 'Uncheck all',
+          groupId: 1,
+          click: function(){
+            linkByField.getSubset(relatedTree.data.FieldId).getItems().forEach(function(item){
+              item.destroy();
+            });
+          }
+        },
+        {
+          name: 'add',
+          caption: 'Add word',
+          click: function(){
+            var newId = parseInt(Math.random() * 1000000 + 10);
+            Word({
+              WordId: newId,
+              Title: 'Word #' + newId,
+              Freq: newId % 17
+            });
+          }
+        }
+      ]
+    });
+
+    // Вставляем компоненты в документ
+    DOM.insert('demo-container', [
+      DOM.createElement('.ListContainer',
+        masterButtonPanel.element,
+        masterTree.element
+      ),
+      DOM.createElement(
+        {
+          description: '#relatedTreeContainer.ListContainer',
+          css: {
+            visibility: 'hidden'
+          }
+        },
+        relatedButtonPanel.element,
+        new basis.ui.field.MatchInput({
+          matchFilter: {
+            node: relatedTree,
+            textNodeGetter: basis.getter('satellite.word.tmpl.title')
+          }
+        }).element,
+        relatedTree.element
+      ),
+      DOM.createElement('.ListContainer',
+        DOM.createElement('DIV.debug', 'Debug for (list of links)'),
+
+        // NOTE: для отладки - список всех связей
+        new nsTree.Tree({
+          dataSource: Link.all,
+          sorting: basis.getter('data.FieldId'),
+
+          // Определяем класс для дочерних узлов (описан выше)
+          childClass: {
+            binding: {
+              title: function(node){
+                var field = Field.get(node.data.FieldId);
+                var property = Word.get(node.data.WordId);
+                return (field ? field.data.Title : '[no field]') + ' <-> ' + (property ? property.data.Title : '[no property]');
+              }
+            }
+          }
+        }).element
+      )/*,
+      groupsTree.element*/
+    ]);
+
+  </script>  
+</body>
+
+</html>

@@ -1,0 +1,194 @@
+<!doctype html>
+
+<html>
+
+<head>
+  <meta http-equiv="Content-type" content="text/html; charset=utf-8" />
+
+  <title>Basis.js demos: Tabs</title>
+
+  <style type="text/css" id="demo-css">
+    HTML,
+    BODY
+    {
+      font-size: small;
+      font-family: Tahoma, Verdana, Arial, sans-serif;
+    }
+
+    .DemoBlock
+    {
+      background: white;
+      border: 1px solid #D0D0D0;
+      border-radius: 3px;
+      padding: 15px;
+      margin: 0 10px .5em 0;
+      overflow: hidden;
+      position: relative;
+    }
+    .DemoBlock H2
+    {
+      font-size: 80%;
+      font-weight: normal;
+      background: #EEE;
+      margin: -15px -15px 10px -15px;
+      padding: 2px;
+      text-align: center;
+    }
+
+    .DemoBlock.aside
+    {
+      float: right;
+      width: 250px;
+      margin-left: 10px;
+      margin-right: 0;
+    }
+    
+    .Basis-AccordionControl .Basis-Page
+    {
+      height: 120px;
+      overflow: auto;
+    }
+  </style>
+  <!--[if lt IE 7]>
+  <style type="text/css">
+    BODY
+    {
+      font-size: x-small;
+    }
+  </style>
+  <![endif]-->
+
+  <script type="text/javascript" data-basis-config src="../../src/basis.js"></script>
+
+  <script type="text/javascript" src="../demo.js"></script>
+</head>
+
+<body>
+  <div id="demo-container"></div>
+
+  <script type="text/javascript" id="demo-javascript">
+
+    basis.require('basis.dom');
+    basis.require('basis.cssom');
+    basis.require('basis.ui.tabs');
+    
+    // import names
+    var DOM = basis.dom;
+    var cssom = basis.cssom;
+    var tabs = basis.ui.tabs;
+
+    //
+    // Main part
+    //
+
+    function createBlock(header, aside){
+      return DOM.insert(
+        DOM.get('demo-container'),
+        DOM.createElement('.DemoBlock' + (aside ? '.aside' : ''), DOM.createElement('H2', header))
+      );
+    }
+
+    // Data source
+    var data = [
+      { data: { title: 'tab4' }, groupId: 3, content: 'content 4' },
+      { data: { title: 'tab1' }, groupId: 1, content: 'content 1' },
+      { data: { title: 'tab6' }, groupId: 3, content: 'content 6' },
+      { data: { title: 'tab5' }, groupId: 3, content: basis.string.repeat('content 5 ', 100) },
+      { data: { title: 'tab3' }, groupId: 2, content: 'content 3', selected: true  },
+      { data: { title: 'tab2' }, groupId: 2, content: 'content 2', disabled: true  },
+      { data: { title: 'tab7' }, groupId: 3, content: 'content 7' }
+    ];
+
+
+    // AccordionControl
+    new tabs.AccordionControl({
+      container: createBlock('AccordionControl', true),
+      childNodes: data
+    });
+
+    // AccordionControl with sorting & grouping
+    new tabs.AccordionControl({
+      container: createBlock('AccordionControl with sorting & grouping', true),
+      childNodes: data,
+      grouping: {
+        rule: 'groupId',
+        sorting: 'data.title'
+      },
+      sorting: 'data.title'
+    });
+
+    // TabControl
+    new tabs.TabControl({
+      container: createBlock('TabControl'),
+      childNodes: data
+    });
+
+    // TabControl with sorting & grouping
+    new tabs.TabControl({
+      container: createBlock('TabControl with sorting & grouping'),
+      childNodes: data,
+      grouping: {
+        rule: 'groupId',
+        sorting: 'data.title'
+      },
+      sorting: 'data.title'
+    });
+
+    // PageControl
+    var container = createBlock('PageControl');
+    var buttonPanel = DOM.createElement();
+    DOM.insert(container, ['Show page: ', buttonPanel]);
+
+    new tabs.PageControl({
+      container: container,
+      handler: {
+        childNodesModified: function(){
+          var pagecontrol = this;
+          DOM.insert(DOM.clear(buttonPanel), this.childNodes.map(function(page, index){
+            var button = page.button;
+
+            if (!button)
+            {
+              page.button = button = DOM.createElement(
+                {
+                  description: 'BUTTON',
+                  click: function(){
+                    var page = pagecontrol.childNodes[index];
+                    if (!page.disabled)
+                      page.select();
+                    else
+                      alert('page with title ' + (page.data.title) + ' is disabled and can\'t be selected');
+                  }
+                },
+                page.data.title
+              );
+            }
+
+            return button;
+          }));
+        }
+      },
+      childNodes: data
+    });
+
+    // TabSheetControl
+    new tabs.TabSheetControl({
+      container: createBlock('TabSheetControl'),
+      childNodes: data
+    });
+
+    // TabSheetControl with sorting & grouping
+    new tabs.TabSheetControl({
+      container: createBlock('TabSheetControl with sorting & grouping'),
+      childNodes: data,
+      grouping: {
+        rule: 'groupId',
+        sorting: 'data.title'
+      },
+      sorting: 'data.title'
+    });
+
+  </script>
+</body>
+
+</html>

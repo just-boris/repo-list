@@ -1,0 +1,16 @@
+/// {
+///     description: 'count() in for',
+///     data: {
+///         items: {
+///             item: [ 'first', 'second', 'third' ]
+///         }
+///     },
+///     result: '0/3.1/3.2/3.'
+/// }
+
+match / {
+    for .items.item {
+        "{ index() }/{ count() }."
+    }
+}
+

@@ -1,0 +1,182 @@
+﻿<!doctype html>
+
+<html>
+
+<head>
+  <meta http-equiv="Content-type" content="text/html; charset=utf-8" />
+
+  <title>Basis.js demos: Windows</title>
+
+  <style type="text/css" id="demo-css">
+    HTML,
+    BODY
+    {
+      font-size: small;
+      font-family: Tahoma, Verdana, Arial, sans-serif;
+    }
+
+    .DemoBlock
+    {
+      background: white;
+      border: 1px solid #D0D0D0;
+      border-radius: 3px;
+      padding: 15px;
+      margin: 0 0 .5em 0;
+      overflow: hidden;
+      position: relative;
+    }
+    .DemoBlock H2
+    {
+      font-size: 80%;
+      font-weight: normal;
+      background: #EEE;
+      margin: -15px -15px 10px -15px;
+      padding: 2px;
+      text-align: center;
+    }
+
+  </style>
+  <!--[if lt IE 7]>
+  <style type="text/css">
+    BODY
+    {
+      font-size: x-small;
+    }
+  </style>
+  <![endif]-->
+
+  <script type="text/javascript" data-basis-config src="../../src/basis.js"></script>
+
+  <script type="text/javascript" src="../demo.js"></script>
+</head>
+
+<body>
+  <div id="demo-container"></div>
+
+  <script type="text/javascript" id="demo-javascript">
+    basis.require('basis.dom');
+    basis.require('basis.ui.button');
+    basis.require('basis.ui.window');
+    
+    // import names
+    var DOM = basis.dom;
+    var getter = basis.getter;
+    var nsButton = basis.ui.button;
+    var nsWindow = basis.ui.window;
+
+    function createBlock(header){
+      return DOM.insert(DOM.get('demo-container'), DOM.createElement('.DemoBlock', DOM.createElement('H2', header)));
+    }
+
+    var simpleWindow = new nsWindow.Window({
+      autocenter: true,
+      moveable: true,
+      title: 'Simple Window',
+      closeOnEscape: true,
+      content: DOM.createElement({ css: { padding: '1.5em 1ex' } }, 'Basis is great framework!'),
+      buttons: [
+        {
+          caption: 'OK',
+          click: function(){
+            alert('OK');
+          }
+        }
+      ],
+      buttonCancel: 'Cancel'
+    });
+
+    var anotherWindow = new nsWindow.Window({
+      autocenter: true,
+      moveable: true,
+      modal: true,
+      title: 'Another Window',
+      buttonCancel: 'Close',
+
+      childClass: {
+        template: 
+          '<div>' +
+            '#{id}. {title}' +
+          '</div>',
+
+        binding: {
+          id: 'data:',
+          title: 'data:'
+        }
+      },
+
+      grouping: {
+        rule: 'data.id % 2',
+        childClass: {
+          template:
+            '<div>' +
+              '<b>{title}</b>' +
+            '</div>',
+
+          binding: {
+            title: getter('data.title', { 0: 'even', 1: 'odd' })
+          }
+        }
+      },
+      childNodes: [
+        {
+          data: {
+            id: 1,
+            title: 'Lorem'
+          }
+        },
+        {
+          data: {
+            id: 2,
+            title: 'ipsum'
+          }
+        },
+        {
+          data: {
+            id: 3,
+            title: 'dolor'
+          }
+        },
+        {
+          data: {
+            id: 4,
+            title: 'discere'
+          }
+        },
+        {
+          data: {
+            id: 5,
+            title: 'admodum'
+          }
+        }
+      ]
+
+    });
+
+    /*simpleWindow.addHandler({
+      open: function(){
+        alert('open window');
+      }
+    });*/
+
+    new nsButton.ButtonPanel({
+      container: createBlock('Simple Window'),
+      childNodes: [
+        {
+          caption: 'Open Window',
+          click: function(){
+            simpleWindow.open();
+          }
+        },
+        {
+          caption: 'Open Another Window',
+          click: function(){
+            anotherWindow.open();
+          }
+        }
+      ]
+    });
+
+  </script>
+</body>
+
+</html>

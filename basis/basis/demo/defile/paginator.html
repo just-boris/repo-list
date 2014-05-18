@@ -1,0 +1,172 @@
+﻿<!doctype html>
+
+<html>
+
+<head>
+  <meta http-equiv="Content-type" content="text/html; charset=utf-8" />
+
+  <title>Basis.js demos: Paginator</title>
+
+  <style type="text/css" id="demo-css">
+    HTML,
+    BODY
+    {
+      font-size: small;
+      font-family: Tahoma, Verdana, Arial, sans-serif;
+    }
+
+    #Demo-Section
+    {
+      width: 600px;
+      background: white;
+      border: 1px solid #E0E0E0;
+      padding: 5px;
+      margin-top: 20px;
+      position: relative;
+    }
+    .Basis-Resizer
+    {
+      opacity: .5 !important;
+      right: -5px;
+      width: 5px;
+      top: -1px;
+      bottom: -1px;
+    }
+
+
+    .Basis-Paginator
+    {
+      margin: 2em 0 1em;
+      width: 100%;
+      border-radius: 4px;
+    }
+    .Basis-Paginator:hover
+    {
+      background: #F4F4F4;
+    }
+
+    .show_dimenstion .Basis-Paginator
+    {
+      border: 1px dashed #AAA;
+    }
+    .self_size .Basis-Paginator
+    {
+      width: auto;
+    }
+
+    .paginator_pages {
+      text-align: right;
+      font-size: 0.8em; 
+      color: #808080;
+    }
+  </style>
+  <!--[if lt IE 7]>
+  <style type="text/css">
+    BODY
+    {
+      font-size: x-small;
+    }
+  </style>
+  <![endif]-->
+
+  <script type="text/javascript" data-basis-config src="../../src/basis.js"></script>
+
+  <script type="text/javascript" src="../demo.js"></script>
+</head>
+
+<body>
+  <div id="demo-container"></div>
+
+  <script type="text/javascript" id="demo-javascript">
+    basis.require('basis.dom');
+    basis.require('basis.cssom');
+    basis.require('basis.ui.button');
+    basis.require('basis.ui.resizer');
+    basis.require('basis.ui.paginator');
+
+    var DOM = basis.dom;
+    var classList = basis.cssom.classList;
+    var ButtonPanel = basis.ui.button.ButtonPanel;
+    var Resizer = basis.ui.resizer.Resizer;
+    var Paginator = basis.ui.paginator.Paginator;
+
+	  function setWidth(w){
+	    demoSection.style.width = w + 'px';
+	  }
+	  function setPageCount(pageCount){
+	    paginators[0].setProperties(pageCount);
+	  }
+
+	  var paginators = [ 
+      new Paginator({ pageCount: 1024, pageSpan: 10, activePage: 350 }),
+      new Paginator({ pageCount: 100, pageSpan: 13, activePage: 70 }),
+      new Paginator({ pageCount: 50, pageSpan: 15, activePage: 15 }),
+      new Paginator({ pageCount: 5, pageSpan: 5, activePage: 5 }),
+      new Paginator({ pageCount: 5, pageSpan: 1, activePage: 5 })
+    ];
+
+	  var demoSection = DOM.createElement('#Demo-Section',
+      paginators.map(function(paginator){
+        return DOM.createElement('',
+          paginator.element,
+          DOM.createElement(".paginator_pages", paginator.pageCount + ' pages')
+        );
+      })
+    );
+
+    new Resizer({
+      element: demoSection
+    });
+
+    DOM.insert(DOM.get('demo-container'), [
+      new ButtonPanel({
+        childNodes: [
+          {
+            caption: 'Auto / 100% width',
+            click: function(){
+              classList(document.body).toggle('self_size');
+            }
+          },
+          {
+            caption: 'Show / hide bounding box',
+            click: function(){
+              classList(document.body).toggle('show_dimenstion');
+            }
+          }
+        ]
+      }).element,
+      DOM.createElement('', 
+        'Set paginators container width: ',
+        new ButtonPanel({
+          childNodes: [300, 450, 600, 750, 900].map(function(width){
+            return {
+              groupId: 1,
+              caption: width,
+              click: function(){
+                setWidth(this.caption);
+              }
+            };
+          })
+        }).element
+      ),
+      DOM.createElement('', 
+        'Set first paginator page count: ',
+        new ButtonPanel({
+          childNodes: [5, 10, 100, 200, 1024].map(function(pageCount){
+            return {
+              groupId: 1,
+              caption: pageCount,
+              click: function(){
+                setPageCount(this.caption);
+              }
+            };
+          })
+        }).element
+      ),
+      demoSection
+    ]);
+
+  </script>
+</body>
+
+</html>

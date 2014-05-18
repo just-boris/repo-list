@@ -1,0 +1,182 @@
+<!doctype html>
+
+<html>
+
+<head>
+  <meta http-equiv="Content-type" content="text/html; charset=utf-8" />
+
+  <title>Basis.js demos: Dataset</title>
+
+  <style type="text/css" id="demo-css">
+    HTML,
+    BODY
+    {
+      font-size: small;
+      font-family: Tahoma, Verdana, Arial, sans-serif;
+    }
+
+    #demo-container
+    {
+      font-family: Arial, sans;
+    }
+
+    H2
+    {
+      clear: both;
+      margin: 0 0 .5em;
+      padding-top: 1em;
+      font-size: 100%;
+    }
+
+    #TagCloud
+    {
+      width: 80%;
+      max-width: 500px;
+      min-width: 250px;
+      text-align: center;
+      margin: 0 auto;
+    }
+
+    .tag
+    {
+      -webkit-transition: font-size .5s;
+      margin: 0 1ex;
+    }
+    .tag SUB
+    {
+      font-size: 10px;
+      padding-left: 2px;
+      color: #D94;
+    }
+  </style>
+  <!--[if lt IE 7]>
+  <style type="text/css">
+    BODY
+    {
+      font-size: x-small;
+    }
+  </style>
+  <![endif]-->
+
+  <script type="text/javascript" data-basis-config src="../../src/basis.js"></script>
+
+  <script type="text/javascript" src="../demo.js"></script>
+  <script type="text/javascript" src="../seedrandom.js"></script>
+</head>
+
+<body>
+  <div id="demo-container"></div>
+
+  <script type="text/javascript" id="demo-javascript">
+    basis.require('basis.data');
+    basis.require('basis.data.index');
+    basis.require('basis.ui');
+
+    //
+    // Data generation
+    //
+
+    Math.seedrandom("tag cloud");
+    var words = (
+      'Lorem ipsum dolor sit amet consectetur adipisicing elit sed do eiusmod tempor incididunt ut labore et dolore magna aliqua ' +
+      'Ut enim ad minim veniam quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat ' +
+      'Duis aute irure dolor in reprehenderit voluptate velit esse cillum dolore eu fugiat nulla pariatur ' +
+      'Excepteur sint occaecat cupidatat non proident sunt in culpa qui officia deserunt mollit anim id est laborum'
+    ).toLowerCase().split(/\s+/);
+
+    function genTags(min, max){
+      var count = min + parseInt((max - min) * Math.random());
+      var res = [];
+
+      while (count-- > 0)
+        res.push(words[parseInt(words.length * Math.random(), 10)]);
+
+      return res;
+    }
+    
+    var data = new basis.data.Dataset({
+      items: basis.array.create(256, function(idx){
+        return new basis.data.Object({
+          data: {
+            id: idx,
+            tags: genTags(1, 6)
+          }
+        })
+      })
+    });
+
+    //
+    // Build tag cloud
+    //
+
+    var cloud = new basis.data.dataset.Cloud({
+      source: data,
+      rule: basis.getter('data.tags')
+    });
+
+    var indexMap = new basis.data.index.IndexMap({
+      source: cloud,
+      calcs: {
+        percentOfRange: basis.data.index.percentOfRange('itemsChanged', 'itemCount')
+      }
+    });
+
+    //
+    // Visualization
+    //
+
+    var tagCloud = new basis.ui.Node({
+      container: document.getElementById('demo-container'),
+      template: '<div id="TagCloud"/>',
+
+      dataSource: cloud,
+      sorting: 'data.title',
+
+      childClass: {
+        fontSize: 0,
+        
+        template: 
+          '<span class="tag" style="font-size: {fontSize}">' +
+            '{title}' +
+            '<sub>{count}</sub>' +
+            '<wbr/>' +
+          '</span>',
+
+        binding: {
+          title: 'data:',
+          count: 'delegate.itemCount',
+          fontSize: 'fontSize'
+        },
+
+        listen: {
+          delegate: {
+            itemsChanged: function(dataset){
+              this.updateBind('count');
+            }
+          }
+        },
+
+        satellite: {
+          indexes: {
+            events: ['rootChanged', 'update'],
+            delegate: function(owner){
+              return indexMap.getMember(owner.root);
+            },
+            instanceOf: basis.data.Object.subclass({
+              active: true,
+              emit_update: function(delta){
+                basis.data.Object.prototype.emit_update.call(this, delta);
+
+                this.owner.fontSize = basis.string.format('{0:.2}%', 50 + 200 * this.data.percentOfRange);
+                this.owner.updateBind('fontSize');
+              }
+            })
+          }
+        }
+      }
+    });
+
+  </script>
+</body>
+
+</html>
