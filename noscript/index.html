@@ -1,160 +1,133 @@
-<!DOCTYPE html>
-<html>
-<head>
-    <title>My projects</title>
-    <meta charset="utf-8">
-    <link href="//netdna.bootstrapcdn.com/bootstrap/3.0.0/css/bootstrap.min.css" rel="stylesheet">
-    <link href="//netdna.bootstrapcdn.com/font-awesome/3.2.1/css/font-awesome.css" rel="stylesheet">
-    <link href="../styles.css" rel="stylesheet">
+<div class="container">
+    <div id="app"></div>
+</div>
+<script src="http://yandex.st/jquery/2.1.0/jquery.min.js"></script>
+<script src="yate/lib/runtime.js"></script>
 
-    <script src="http://yandex.st/jquery/2.1.0/jquery.min.js"></script>
-    <script src="yate/lib/runtime.js"></script>
+<!-- nommon (the same, as used in noscript) -->
+<script src="nommon/lib/no.base.js"></script>
+<script src="nommon/lib/no.events.js"></script>
+<script src="nommon/lib/no.parser.js"></script>
+<script src="nommon/lib/no.jpath.js"></script>
+<script src="nommon/lib/no.promise.js"></script>
+<script src="nommon/lib/no.array.js"></script>
+<script src="nommon/lib/no.object.js"></script>
 
-    <!-- nommon (the same, as used in noscript) -->
-    <script src="nommon/lib/no.base.js"></script>
-    <script src="nommon/lib/no.events.js"></script>
-    <script src="nommon/lib/no.parser.js"></script>
-    <script src="nommon/lib/no.jpath.js"></script>
-    <script src="nommon/lib/no.promise.js"></script>
-    <script src="nommon/lib/no.array.js"></script>
-    <script src="nommon/lib/no.object.js"></script>
+<!-- noscript -->
+<script src="noscript/src/ns.js"></script>
+<script src="noscript/src/ns.log.js"></script>
+<script src="noscript/src/ns.dom.js"></script>
+<script src="noscript/src/ns.entityify.js"></script>
+<script src="noscript/src/ns.history.js"></script>
+<script src="noscript/src/ns.object.js"></script>
+<script src="noscript/src/ns.consts.js"></script>
+<script src="noscript/src/ns.consts.events.js"></script>
+<script src="noscript/src/ns.http.js"></script>
+<script src="noscript/src/ns.action.js"></script>
+<script src="noscript/src/ns.box.js"></script>
+<script src="noscript/src/ns.model.js"></script>
+<script src="noscript/src/ns.modelCollection.js"></script>
+<script src="noscript/src/ns.layout.js"></script>
+<script src="noscript/src/ns.page.js"></script>
+<script src="noscript/src/ns.request.js"></script>
+<script src="noscript/src/ns.router.js"></script>
+<script src="noscript/src/ns.update.js"></script>
+<script src="noscript/src/ns.view.js"></script>
+<script src="noscript/src/ns.viewCollection.js"></script>
 
-    <!-- noscript -->
-    <script src="noscript/src/ns.js"></script>
-    <script src="noscript/src/ns.log.js"></script>
-    <script src="noscript/src/ns.dom.js"></script>
-    <script src="noscript/src/ns.entityify.js"></script>
-    <script src="noscript/src/ns.history.js"></script>
-    <script src="noscript/src/ns.object.js"></script>
-    <script src="noscript/src/ns.consts.js"></script>
-    <script src="noscript/src/ns.consts.events.js"></script>
-    <script src="noscript/src/ns.http.js"></script>
-    <script src="noscript/src/ns.action.js"></script>
-    <script src="noscript/src/ns.box.js"></script>
-    <script src="noscript/src/ns.model.js"></script>
-    <script src="noscript/src/ns.modelCollection.js"></script>
-    <script src="noscript/src/ns.layout.js"></script>
-    <script src="noscript/src/ns.page.js"></script>
-    <script src="noscript/src/ns.request.js"></script>
-    <script src="noscript/src/ns.router.js"></script>
-    <script src="noscript/src/ns.update.js"></script>
-    <script src="noscript/src/ns.view.js"></script>
-    <script src="noscript/src/ns.viewCollection.js"></script>
-
-    <script src="noscript/yate/noscript-yate-externals.js"></script>
-    <script src="templates.yate.js"></script>
-    <script type="text/javascript">
-        ns.router.routes = {
-            route: {'/': 'index'}
-        };
-        ns.layout.define('app', {
-            'app': {'content@': {}}
-        });
-        ns.layout.define('index', {
-            'app content@': {
-                filters: true,
-                list: true
-            }
-        }, 'app');
-        ns.View.define('app');
-        ns.View.define('list', {
-            models: ['repos', 'currentLang', 'showForks']
-        });
-        ns.View.define('filters', {
-            models: ['langs'],
-            ctor: function() {
-                var showForks = ns.Model.get('showForks').getData().value;
-                this.on('ns-view-htmlinit', this.toggleForks.bind(this, showForks))
+<script src="noscript/yate/noscript-yate-externals.js"></script>
+<script src="templates.yate.js"></script>
+<script type="text/javascript">
+    ns.router.routes = {
+        route: {'/': 'index'}
+    };
+    ns.layout.define('app', {
+        'app': {'content@': {}}
+    });
+    ns.layout.define('index', {
+        'app content@': {
+            filters: true,
+            list: true
+        }
+    }, 'app');
+    ns.View.define('app');
+    ns.View.define('list', {
+        models: ['repos', 'currentLang', 'showForks']
+    });
+    ns.View.define('filters', {
+        models: ['langs'],
+        ctor: function() {
+            var showForks = ns.Model.get('showForks').getData().value;
+            this.on('ns-view-htmlinit', this.toggleForks.bind(this, showForks))
+        },
+        events: {
+            'change .filters select': 'onSelectLang',
+            'click .forks .forks_show': 'onShowForks',
+            'click .forks .forks_hide': 'onHideForks'
+        },
+        methods: {
+            toggleForks: function(show) {
+                this.$node.find('.forks .forks_show').toggleClass('active', show);
+                this.$node.find('.forks .forks_hide').toggleClass('active', !show);
+                ns.Model.get('showForks').setData({value: show});
+                ns.page.go();
             },
-            events: {
-                'change .filters select': 'onSelectLang',
-                'click .forks .forks_show': 'onShowForks',
-                'click .forks .forks_hide': 'onHideForks'
+            onShowForks: function() {
+                this.toggleForks(true);
             },
-            methods: {
-                toggleForks: function(show) {
-                    this.$node.find('.forks .forks_show').toggleClass('active', show);
-                    this.$node.find('.forks .forks_hide').toggleClass('active', !show);
-                    ns.Model.get('showForks').setData({value: show});
-                    ns.page.go();
-                },
-                onShowForks: function() {
-                    this.toggleForks(true);
-                },
-                onHideForks: function() {
-                    this.toggleForks(false);
-                },
-                onSelectLang: function(evt) {
-                    ns.Model.get('currentLang').setData(evt.target.value);
-                    ns.page.go();
-                }
+            onHideForks: function() {
+                this.toggleForks(false);
+            },
+            onSelectLang: function(evt) {
+                ns.Model.get('currentLang').setData(evt.target.value);
+                ns.page.go();
             }
-        });
-        yr.externals['not-filtered'] = function(nodeset) {
-            var repo = nodeset[0].data,
+        }
+    });
+    yr.externals['not-filtered'] = function(nodeset) {
+        var repo = nodeset[0].data,
                 lang = ns.Model.get('currentLang').getData(),
                 showForks = ns.Model.get('showForks').getData().value;
-            return (showForks || !repo.fork) && (lang === "none" || repo.language === lang)
-        };
+        return (showForks || !repo.fork) && (lang === "none" || repo.language === lang)
+    };
 
-        ns.Model.define('repo', {
-            params: {id: null}
-        });
-        ns.Model.define('repos', {
-            isCollection: true
-        });
-        ns.Model.define('langs', {
-            isCollection: true
-        });
-        ns.Model.define('showForks');
-        ns.Model.define('currentLang');
-        ns.page.title = function() {
-            return document.title;
-        };
-        ns.router.baseDir = location.pathname.substr(0, location.pathname.length - 1);
+    ns.Model.define('repo', {
+        params: {id: null}
+    });
+    ns.Model.define('repos', {
+        isCollection: true
+    });
+    ns.Model.define('langs', {
+        isCollection: true
+    });
+    ns.Model.define('showForks');
+    ns.Model.define('currentLang');
+    ns.page.title = function() {
+        return document.title;
+    };
+    ns.router.baseDir = location.pathname.substr(0, location.pathname.length - 1);
 
-        $(function() {
-            $.getJSON('https://api.github.com/users/just-boris/repos').success(function(response) {
-                function collectLanguages(repos) {
-                    var result = [];
-                    repos.forEach(function(repo) {
-                        if(result.indexOf(repo.language) === -1)  {
-                            result.push(repo.language);
-                        }
-                    });
-                    return result;
-                }
-                ns.Model.get('currentLang').setData("none");
-                ns.Model.get('showForks').setData({value: false});
-                ns.Model.get('langs').setData(collectLanguages(response));
-                response.forEach(function(repo) {
-                    ns.Model.get('repos').insert(
-                            ns.Model.get('repo', {id: repo.id}).setData(repo)
-                    );
+    $(function() {
+        $.getJSON('https://api.github.com/users/just-boris/repos').success(function(response) {
+            function collectLanguages(repos) {
+                var result = [];
+                repos.forEach(function(repo) {
+                    if(result.indexOf(repo.language) === -1)  {
+                        result.push(repo.language);
+                    }
                 });
-                ns.init();
-                ns.page.go();
+                return result;
+            }
+            ns.Model.get('currentLang').setData("none");
+            ns.Model.get('showForks').setData({value: false});
+            ns.Model.get('langs').setData(collectLanguages(response));
+            response.forEach(function(repo) {
+                ns.Model.get('repos').insert(
+                        ns.Model.get('repo', {id: repo.id}).setData(repo)
+                );
             });
+            ns.init();
+            ns.page.go();
         });
-    </script>
-</head>
-<body>
-    <nav class="navbar navbar-default" role="navigation">
-        <ul class="nav navbar-nav">
-            <li><a>Choose version:</a></li>
-            <li class="divider-vertical"></li>
-            <li><a href="../">Angular JS</a></li>
-            <li><a href="../react/">React JS</a></li>
-            <li><a href="../basis/">Basis JS</a></li>
-            <li class="active"><a href="../noscript/">Noscript JS</a></li>
-        </ul>
-        <ul class="nav navbar-nav navbar-right">
-            <li class=""><a href="https://github.com/just-boris/repo-list">Code on Github</a></li>
-            <li class=""><a href="/">Back to Catatron</a></li>
-        </ul>
-    </nav>
-    <div class="container">
-        <div id="app"></div>
-    </div>
-</body>
-</html>
+    });
+</script>

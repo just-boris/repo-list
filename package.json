@@ -1,0 +1,19 @@
+{
+  "name": "repo-list",
+  "version": "0.0.0",
+  "description": "",
+  "repository": {
+    "type": "git",
+    "url": "git://github.com/just-boris/repo-list.git"
+  },
+  "author": "just-boris <just-boris@hotmail.com>",
+  "bugs": {
+    "url": "https://github.com/just-boris/repo-list/issues"
+  },
+  "homepage": "https://github.com/just-boris/repo-list",
+  "dependencies": {
+    "gulp-layoutize": "git://github.com/just-boris/gulp-layoutize.git#pass-file",
+    "gulp": "~3.6.2",
+    "ejs": "~1.0.0"
+  }
+}
