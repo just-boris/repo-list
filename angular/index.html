@@ -26,17 +26,29 @@
         <li><a>Choose version:</a></li>
         <li class="divider-vertical"></li>
         
-            <li class="framework active"><a href="../angular">angular</a></li>
+            
+                <li class="framework active"><a>angular</a></li>
+            
         
-            <li class="framework "><a href="../basis">basis</a></li>
+            
+                <li class="framework"><a href="../basis/">basis</a></li>
+            
         
-            <li class="framework "><a href="../ember">ember</a></li>
+            
+                <li class="framework"><a href="../ember/">ember</a></li>
+            
         
-            <li class="framework "><a href="../marionette">marionette</a></li>
+            
+                <li class="framework"><a href="../marionette/">marionette</a></li>
+            
         
-            <li class="framework "><a href="../noscript">noscript</a></li>
+            
+                <li class="framework"><a href="../noscript/">noscript</a></li>
+            
         
-            <li class="framework "><a href="../react">react</a></li>
+            
+                <li class="framework"><a href="../react/">react</a></li>
+            
         
     </ul>
     <ul class="nav navbar-nav navbar-right">
@@ -57,7 +69,7 @@
             </select>
         </form>
     </div>
-    <div class="repo" ng-repeat = "repo in repos | filter:filterRepos">
+    <div class="repo ng-cloak" ng-repeat="repo in repos | filter:filterRepos">
         <div class="repo-language"><em>{{repo.language}}</em></div>
         <h3>
             <a ng-if="repo.homepage" ng-href="{{repo.homepage}}">{{repo.name}}</a>
@@ -93,5 +105,3 @@
 
 </body>
 </html>
-
-
