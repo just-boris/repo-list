@@ -11,7 +11,7 @@
             </select>
         </form>
     </div>
-    <div class="repo" ng-repeat = "repo in repos | filter:filterRepos">
+    <div class="repo ng-cloak" ng-repeat="repo in repos | filter:filterRepos">
         <div class="repo-language"><em>{{repo.language}}</em></div>
         <h3>
             <a ng-if="repo.homepage" ng-href="{{repo.homepage}}">{{repo.name}}</a>
