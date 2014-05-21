@@ -26,7 +26,11 @@
         <li><a>Choose version:</a></li>
         <li class="divider-vertical"></li>
         <% frameworks.forEach(function(framework) { %>
-            <li class="framework <%= isActive(file, framework) ? 'active': '' %>"><a href="../<%= framework%>"><%= framework %></a></li>
+            <% if(isActive(file, framework)) {%>
+                <li class="framework active"><a><%= framework %></a></li>
+            <% } else { %>
+                <li class="framework"><a href="../<%= framework%>/"><%= framework %></a></li>
+            <% } %>
         <% }); %>
     </ul>
     <ul class="nav navbar-nav navbar-right">
