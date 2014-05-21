@@ -61,18 +61,21 @@
                     this.model.set('forks', false);
                 }
             },
+            modelEvents: {
+                'change:forks': 'render',
+                'change': 'filterRepos'
+            },
             initialize: function(options) {
-                this.model.on('change:forks', this.render);
-                this.model.on('change', this.filterRepos.bind(this));
                 this.totalItems = options.totalItems;
                 this.filterRepos(this.model);
             },
             filterRepos: function() {
-                var filters = this.model.toJSON();
+                var forks = this.model.get('forks'),
+                    lang = this.model.get('lang');
                 this.collection.reset(
                     this.totalItems.filter(function(repo) {
-                        return (filters.forks || !repo.get('fork')) &&
-                            (!filters.lang || repo.get('language') === filters.lang);
+                        return (forks || !repo.get('fork')) &&
+                            (!lang || repo.get('language') === lang);
                     })
                 );
             }
