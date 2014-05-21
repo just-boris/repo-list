@@ -12,8 +12,9 @@
   },
   "homepage": "https://github.com/just-boris/repo-list",
   "dependencies": {
-    "gulp-layoutize": "git://github.com/just-boris/gulp-layoutize.git#pass-file",
+    "ejs": "~1.0.0",
     "gulp": "~3.6.2",
-    "ejs": "~1.0.0"
+    "gulp-clean": "^0.2.4",
+    "gulp-layoutize": "0.0.4"
   }
 }
