@@ -3,11 +3,6 @@
     <repo-app></repo-app>
 </div>
 <script src="http://www.polymer-project.org/components/platform/platform.js"></script>
-<script type="text/javascript">
-    if(typeof Promise !== 'function') {
-        document.write('<script src="http://s3.amazonaws.com/es6-promises/promise-1.0.0.min.js"></'+'script>');
-    }
-</script>
 <link rel="import" href="http://www.polymer-project.org/components/core-elements/core-elements.html">
 
 <polymer-element name="repo-filters" attributes="languages forksVisible language">
@@ -43,7 +38,7 @@
     </script>
 </polymer-element>
 
-<polymer-element name="repo-list" attributes="repos">
+<polymer-element name="repo-list" attributes="repos" noscript>
     <template>
         <link href="styles.css" rel="stylesheet">
         <template repeat="{{repo in repos}}">
@@ -59,9 +54,6 @@
             </div>
         </template>
     </template>
-    <script>
-        Polymer('repo-list', {});
-    </script>
 </polymer-element>
 
 <polymer-element name="repo-app">
