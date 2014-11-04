@@ -1,13 +1,18 @@
 <div class="container">
-    <p>I have written some own projects. So, I have published on Github the most interesting of them in my opinion.</p>
+    <p>I wrote some own projects. So, I have published on Github the most interesting of them in my opinion.</p>
     <repo-app></repo-app>
 </div>
 <script src="http://www.polymer-project.org/components/platform/platform.js"></script>
 <link rel="import" href="http://www.polymer-project.org/components/core-elements/core-elements.html">
 
-<polymer-element name="repo-filters" attributes="languages forksVisible language">
+<polymer-element name="repo-app">
     <template>
-        <link href="styles.css" rel="stylesheet">
+        <link href="//netdna.bootstrapcdn.com/bootstrap/3.0.0/css/bootstrap.min.css" rel="stylesheet">
+        <link href="//netdna.bootstrapcdn.com/font-awesome/3.2.1/css/font-awesome.css" rel="stylesheet">
+        <link href="../assets/styles.css" rel="stylesheet">
+        <core-ajax auto handleAs="json"
+            url="https://api.github.com/users/just-boris/repos"
+            on-core-response="{{handleResponse}}"></core-ajax>
         <div class="filters">
             <div class="btn-group">
                 <button type="button" class="btn btn-default {{ {active:!forksVisible} | tokenList}}" on-click="{{hideForks}}">Only own</button>
@@ -22,25 +27,6 @@
                 </select>
             </form>
         </div>
-    </template>
-    <script>
-        Polymer('repo-filters', {
-            showForks: function() {
-                this.forksVisible = true;
-            },
-            hideForks: function() {
-                this.forksVisible = false;
-            },
-            changeLanguage: function(e, d, sender) {
-                this.language = sender.value;
-            }
-        });
-    </script>
-</polymer-element>
-
-<polymer-element name="repo-list" attributes="repos" noscript>
-    <template>
-        <link href="styles.css" rel="stylesheet">
         <template repeat="{{repo in repos}}">
             <div class="repo">
                 <div class="repo-language"><em>{{repo.language}}</em></div>
@@ -54,20 +40,10 @@
             </div>
         </template>
     </template>
-</polymer-element>
-
-<polymer-element name="repo-app">
-    <template>
-        <core-ajax auto handleAs="json"
-            url="https://api.github.com/users/just-boris/repos"
-            on-core-response="{{handleResponse}}"></core-ajax>
-        <repo-filters languages="{{languages}}" forksVisible="{{showForks}}" language="{{language}}"></repo-filters>
-        <repo-list repos="{{repos}}"></repo-list>
-    </template>
     <script>
         Polymer('repo-app', {
             observe: {
-                showForks: 'applyFilters',
+                forksVisible: 'applyFilters',
                 language: 'applyFilters'
             },
             handleResponse: function(e, data) {
@@ -83,9 +59,18 @@
                     return langs;
                 }, []);
             },
+            showForks: function() {
+                this.forksVisible = true;
+            },
+            hideForks: function() {
+                this.forksVisible = false;
+            },
+            changeLanguage: function(e, d, sender) {
+                this.language = sender.value;
+            },
             applyFilters: function() {
                 this.repos = this.allRepos.filter(function(repo) {
-                    return (this.showForks || !repo.fork) &&
+                    return (this.forksVisible || !repo.fork) &&
                         (!this.language || repo.language === this.language);
                 }, this)
             }
