@@ -13,7 +13,7 @@
   "homepage": "https://github.com/just-boris/repo-list",
   "dependencies": {
     "ejs": "~1.0.0",
-    "gulp": "~3.6.2",
+    "gulp": "^3.8.10",
     "gulp-clean": "^0.2.4",
     "gulp-layoutize": "0.0.4"
   }

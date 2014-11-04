@@ -1,0 +1,102 @@
+<div class="container">
+    <p>I have written some own projects. So, I have published on Github the most interesting of them in my opinion.</p>
+    <repo-app></repo-app>
+</div>
+<script src="http://www.polymer-project.org/components/platform/platform.js"></script>
+<script type="text/javascript">
+    if(typeof Promise !== 'function') {
+        document.write('<script src="http://s3.amazonaws.com/es6-promises/promise-1.0.0.min.js"></'+'script>');
+    }
+</script>
+<link rel="import" href="http://www.polymer-project.org/components/core-elements/core-elements.html">
+
+<polymer-element name="repo-filters" attributes="languages forksVisible language">
+    <template>
+        <link href="styles.css" rel="stylesheet">
+        <div class="filters">
+            <div class="btn-group">
+                <button type="button" class="btn btn-default {{ {active:!forksVisible} | tokenList}}" on-click="{{hideForks}}">Only own</button>
+                <button type="button" class="btn btn-default {{ {active: forksVisible} | tokenList}}" on-click="{{showForks}}">Include forks</button>
+            </div>
+            <form class="form-inline pull-right" role="form">
+                <select class="form-control" on-change="{{changeLanguage}}">
+                    <option value="">All languages</option>
+                    <template repeat="{{lang in languages}}">
+                        <option>{{lang}}</option>
+                    </template>
+                </select>
+            </form>
+        </div>
+    </template>
+    <script>
+        Polymer('repo-filters', {
+            showForks: function() {
+                this.forksVisible = true;
+            },
+            hideForks: function() {
+                this.forksVisible = false;
+            },
+            changeLanguage: function(e, d, sender) {
+                this.language = sender.value;
+            }
+        });
+    </script>
+</polymer-element>
+
+<polymer-element name="repo-list" attributes="repos">
+    <template>
+        <link href="styles.css" rel="stylesheet">
+        <template repeat="{{repo in repos}}">
+            <div class="repo">
+                <div class="repo-language"><em>{{repo.language}}</em></div>
+                <h3>
+                    <a hidden?="{{!repo.homepage}}" href="{{repo.homepage}}">{{repo.name}}</a>
+                    <span hidden?="{{repo.homepage}}">{{repo.name}}</span>
+                    <a class="github-repo" title="Code on Github" href="{{repo.html_url}}"><i class="icon-github"></i></a>
+                    <i class="icon-code-fork" hidden?="{{!repo.fork}}" title="Forked repo"></i>
+                </h3>
+                <p>{{repo.description}}</p>
+            </div>
+        </template>
+    </template>
+    <script>
+        Polymer('repo-list', {});
+    </script>
+</polymer-element>
+
+<polymer-element name="repo-app">
+    <template>
+        <core-ajax auto handleAs="json"
+            url="https://api.github.com/users/just-boris/repos"
+            on-core-response="{{handleResponse}}"></core-ajax>
+        <repo-filters languages="{{languages}}" forksVisible="{{showForks}}" language="{{language}}"></repo-filters>
+        <repo-list repos="{{repos}}"></repo-list>
+    </template>
+    <script>
+        Polymer('repo-app', {
+            observe: {
+                showForks: 'applyFilters',
+                language: 'applyFilters'
+            },
+            handleResponse: function(e, data) {
+                this.allRepos = data.response;
+                this.languages = this.collectLanguages(this.allRepos);
+                this.applyFilters();
+            },
+            collectLanguages: function(repos) {
+                return repos.reduce(function(langs, repo) {
+                    if(langs.indexOf(repo.language) === -1) {
+                        langs.push(repo.language);
+                    }
+                    return langs;
+                }, []);
+            },
+            applyFilters: function() {
+                this.repos = this.allRepos.filter(function(repo) {
+                    return (this.showForks || !repo.fork) &&
+                        (!this.language || repo.language === this.language);
+                }, this)
+            }
+        });
+    </script>
+</polymer-element>
