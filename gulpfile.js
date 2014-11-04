@@ -2,7 +2,7 @@
 var fs = require('fs'),
     path = require('path'),
     gulp = require('gulp'),
-    clean = require('gulp-clean'),
+    del = require('del'),
     layoutize = require("gulp-layoutize");
 
 function getFrameworks() {
@@ -27,9 +27,8 @@ gulp.task('layoutize', ['clean'], function() {
         .pipe(gulp.dest('dist/'))
 });
 
-gulp.task('clean', function() {
-    return gulp.src('dist/', {read: false})
-        .pipe(clean());
+gulp.task('clean', function(done) {
+    del(['dist/**/*', '!dist/.git'], done);
 });
 
 gulp.task('copy', ['clean'], function() {
