@@ -1,0 +1,143 @@
+<html>
+<head>
+    <title>My projects</title>
+    <meta charset="utf-8">
+    <link href="//netdna.bootstrapcdn.com/bootstrap/3.0.0/css/bootstrap.min.css" rel="stylesheet">
+    <link href="//netdna.bootstrapcdn.com/font-awesome/3.2.1/css/font-awesome.css" rel="stylesheet">
+    <link href="../assets/styles.css" rel="stylesheet">
+    <script type="text/javascript">
+        var _gaq = _gaq || [];
+        _gaq.push(['_setAccount', 'UA-39285873-1']);
+        _gaq.push(['_trackPageview']);
+
+        (function() {
+            var ga = document.createElement('script');
+            ga.type = 'text/javascript';
+            ga.async = true;
+            ga.src = ('https:' == document.location.protocol ? 'https://ssl' : 'http://www') + '.google-analytics.com/ga.js';
+            var s = document.getElementsByTagName('script')[0];
+            s.parentNode.insertBefore(ga, s);
+        })();
+    </script>
+</head>
+<body>
+<nav class="navbar navbar-default" role="navigation">
+    <ul class="nav navbar-nav">
+        <li><a>Choose version:</a></li>
+        <li class="divider-vertical"></li>
+        
+            
+                <li class="framework"><a href="../angular/">angular</a></li>
+            
+        
+            
+                <li class="framework"><a href="../basis/">basis</a></li>
+            
+        
+            
+                <li class="framework"><a href="../ember/">ember</a></li>
+            
+        
+            
+                <li class="framework"><a href="../marionette/">marionette</a></li>
+            
+        
+            
+                <li class="framework"><a href="../noscript/">noscript</a></li>
+            
+        
+            
+                <li class="framework active"><a>polymer</a></li>
+            
+        
+            
+                <li class="framework"><a href="../react/">react</a></li>
+            
+        
+    </ul>
+    <ul class="nav navbar-nav navbar-right">
+        <li class=""><a href="https://github.com/just-boris/repo-list">Code on Github</a></li>
+        <li class=""><a href="/">Back to Catatron</a></li>
+    </ul>
+</nav>
+<div class="container">
+    <p>I wrote some own projects. So, I have published on Github the most interesting of them in my opinion.</p>
+    <repo-app></repo-app>
+</div>
+<script src="http://www.polymer-project.org/components/platform/platform.js"></script>
+<link rel="import" href="http://www.polymer-project.org/components/core-elements/core-elements.html">
+
+<polymer-element name="repo-app">
+    <template>
+        <link href="//netdna.bootstrapcdn.com/bootstrap/3.0.0/css/bootstrap.min.css" rel="stylesheet">
+        <link href="//netdna.bootstrapcdn.com/font-awesome/3.2.1/css/font-awesome.css" rel="stylesheet">
+        <link href="../assets/styles.css" rel="stylesheet">
+        <core-ajax auto handleAs="json"
+            url="https://api.github.com/users/just-boris/repos"
+            on-core-response="{{handleResponse}}"></core-ajax>
+        <div class="filters">
+            <div class="btn-group">
+                <button type="button" class="btn btn-default {{ {active:!forksVisible} | tokenList}}" on-click="{{hideForks}}">Only own</button>
+                <button type="button" class="btn btn-default {{ {active: forksVisible} | tokenList}}" on-click="{{showForks}}">Include forks</button>
+            </div>
+            <form class="form-inline pull-right" role="form">
+                <select class="form-control" on-change="{{changeLanguage}}">
+                    <option value="">All languages</option>
+                    <template repeat="{{lang in languages}}">
+                        <option>{{lang}}</option>
+                    </template>
+                </select>
+            </form>
+        </div>
+        <template repeat="{{repo in repos}}">
+            <div class="repo">
+                <div class="repo-language"><em>{{repo.language}}</em></div>
+                <h3>
+                    <a hidden?="{{!repo.homepage}}" href="{{repo.homepage}}">{{repo.name}}</a>
+                    <span hidden?="{{repo.homepage}}">{{repo.name}}</span>
+                    <a class="github-repo" title="Code on Github" href="{{repo.html_url}}"><i class="icon-github"></i></a>
+                    <i class="icon-code-fork" hidden?="{{!repo.fork}}" title="Forked repo"></i>
+                </h3>
+                <p>{{repo.description}}</p>
+            </div>
+        </template>
+    </template>
+    <script>
+        Polymer('repo-app', {
+            observe: {
+                forksVisible: 'applyFilters',
+                language: 'applyFilters'
+            },
+            handleResponse: function(e, data) {
+                this.allRepos = data.response;
+                this.languages = this.collectLanguages(this.allRepos);
+                this.applyFilters();
+            },
+            collectLanguages: function(repos) {
+                return repos.reduce(function(langs, repo) {
+                    if(langs.indexOf(repo.language) === -1) {
+                        langs.push(repo.language);
+                    }
+                    return langs;
+                }, []);
+            },
+            showForks: function() {
+                this.forksVisible = true;
+            },
+            hideForks: function() {
+                this.forksVisible = false;
+            },
+            changeLanguage: function(e, d, sender) {
+                this.language = sender.value;
+            },
+            applyFilters: function() {
+                this.repos = this.allRepos.filter(function(repo) {
+                    return (this.forksVisible || !repo.fork) &&
+                        (!this.language || repo.language === this.language);
+                }, this)
+            }
+        });
+    </script>
+</polymer-element>
+</body>
+</html>
